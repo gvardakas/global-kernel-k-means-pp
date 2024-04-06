@@ -40,10 +40,7 @@ class InitialPartition:
 		minimum_distances[centers_indices] = 0
 		partition[centers_indices] = centers_indices
 		
-		return minimum_distances, partition
-
-	def scale_partition(partition):
-		return LabelEncoder().fit_transform(partition)  
+		return minimum_distances, partition	
 
 	def calculate_initial_partition_with_kkmeans_pp_initialization(self, K, X, kernel_matrix):
 		centers_indices = []
@@ -59,14 +56,14 @@ class InitialPartition:
 			kernel_distances_between_points = self.calculate_kernel_distances_between_points(centers_indices[i], centers_indices, X, kernel_matrix, kernel_distances_between_points)
 			minimum_distances, partition = self.calculate_minimum_distances_from_centers_and_partition(centers_indices, kernel_distances_between_points)
 			probabilities = self.calculate_points_probabilities_to_be_selected(minimum_distances)
-			
-		return centers_indices, self.scale_partition(partition)
+		print(f"\n centers_indices are: {centers_indices}!")
+		return centers_indices, partition
 	
 	def calculate_initial_partition_with_froggy_initialization(self, K, N): 
 		partition = self.rs.randint(K, size=N)
 		centers_indices = np.unique(partition)
 		
-		return centers_indices, self.scale_partition(partition)
+		return centers_indices, partition
 	
 	def calculate_initial_partition(self, K, X, kernel_matrix, method):
 		if method == 'Froggy':
