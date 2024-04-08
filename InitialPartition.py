@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.utils.validation import check_random_state
 from sklearn.preprocessing import LabelEncoder
 import random
+import math
 
 class InitialPartition:
 
@@ -51,8 +52,8 @@ class InitialPartition:
 
 	def calculate_initial_partition_with_kkmeans_pp_initialization(self, K, X, kernel_matrix):
 		centers_indices = []
-		n_samples = X.shape[0]
-		kernel_distances_between_points = np.zeros((n_samples, n_samples))
+		N = X.shape[0]
+		kernel_distances_between_points = np.zeros((N, N))
 		
 		for i in range(K):
 			if i != 0:
@@ -71,22 +72,45 @@ class InitialPartition:
 		centers_indices = np.unique(partition)
 		
 		return centers_indices, partition
+
+	def select_random_integers_without_replacement(self, K, N):
+		return random.sample(range(N), K)
+
+	def calculate_euclidean_distance(self, x1, x2):    	
+		return np.sqrt(np.sum((x1 - x2) ** 2))
+
+	def calculate_initial_partition_with_kmeans_initialization(self, K, X):
+		N = X.shape[0] 
+		centers_indices = self.select_random_integers_without_replacement(K, N)
+		partition = np.zeros(X.shape[0])
+
+		for i in range(N):
+			min_distance = math.inf
+
+			for j in range(K):
+				cur_distance = self.calculate_euclidean_distance(X[i], X[centers_indices[j]])
+				
+				if(cur_distance < min_distance):
+					min_distance = cur_distance
+					partition[i] = j
+
+		return np.unique(partition), partition	
 	
 	def calculate_initial_partition(self, K, X, kernel_matrix, method):
 		if method == 'Froggy':
 			print("Executing Froggy Initialization")
 			return self.calculate_initial_partition_with_froggy_initialization(K, X.shape[0])
 		
-		elif method == 'KMeans':
+		elif method == 'kMeans':
+			print("Executing kMeans Initialization")
+			return self.calculate_initial_partition_with_kmeans_initialization(K, X)
+		
+		elif method == 'kMeans++':
 			print("Executing Froggy Initialization")
 			raise Exception("Error! You didn't choose an existing initialization method!")
 		
-		elif method == 'KMeans++':
-			print("Executing Froggy Initialization")
-			raise Exception("Error! You didn't choose an existing initialization method!")
-		
-		elif method == 'KKmeans++':
-			print("Executing KKMeans++ Initialization")
+		elif method == 'KkMeans++':
+			print("Executing KkMeans++ Initialization")
 			return self.calculate_initial_partition_with_kkmeans_pp_initialization(K, X, kernel_matrix)
 		
 		else:
