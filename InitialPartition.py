@@ -20,7 +20,7 @@ class InitialPartition:
 
 	def calculate_kernel_distances_between_points(self, center_index, centers_indices, X, kernel_matrix, kernel_distances_between_points):
 		for i in range(X.shape[0]):
-			if i not in centers_indices: 
+			if i not in centers_indices:
 				kernel_distances_between_points[center_index, i] = kernel_matrix[center_index, center_index] - 2 * kernel_matrix[center_index, i] + kernel_matrix[i, i]
 		return kernel_distances_between_points
 
@@ -36,17 +36,17 @@ class InitialPartition:
 			if len(nonzero_indices) > 0:
 				partition[i] = nonzero_indices[np.argmin(column[nonzero_indices])]
 				minimum_distances[i] = column[partition[i]]
-		
+
 		# Make 0 the distances for centers and set their partition to their index
 		minimum_distances[centers_indices] = 0
 		partition[centers_indices] = centers_indices
-		
-		return minimum_distances, partition	
-	
+
+		return minimum_distances, partition
+
 	def scale_partition(self, partition):
-		partition = LabelEncoder().fit_transform(partition) 
+		partition = LabelEncoder().fit_transform(partition)
 		centers_indices = np.unique(partition)
-		
+
 		print(f"\n centers_indices are: {centers_indices}!")
 		return centers_indices, partition
 
@@ -54,33 +54,33 @@ class InitialPartition:
 		centers_indices = []
 		N = X.shape[0]
 		kernel_distances_between_points = np.zeros((N, N))
-		
+
 		for i in range(K):
 			if i != 0:
 				centers_indices.append(self.select_next_center_index(centers_indices, probabilities))
 			else:
 				centers_indices.append(self.get_initial_center_index(X))
-			
+
 			kernel_distances_between_points = self.calculate_kernel_distances_between_points(centers_indices[i], centers_indices, X, kernel_matrix, kernel_distances_between_points)
 			minimum_distances, partition = self.calculate_minimum_distances_from_centers_and_partition(centers_indices, kernel_distances_between_points)
 			probabilities = self.calculate_points_probabilities_to_be_selected(minimum_distances)
-		
+
 		return self.scale_partition(partition)
-	
-	def calculate_initial_partition_with_froggy_initialization(self, K, N): 
+
+	def calculate_initial_partition_with_forgy_initialization(self, K, N):
 		partition = self.rs.randint(K, size=N)
 		centers_indices = np.unique(partition)
-		
+
 		return centers_indices, partition
 
 	def select_random_integers_without_replacement(self, K, N):
 		return random.sample(range(N), K)
 
-	def calculate_euclidean_distance(self, x1, x2):    	
+	def calculate_euclidean_distance(self, x1, x2):
 		return np.sqrt(np.sum((x1 - x2) ** 2))
 
 	def calculate_initial_partition_with_kmeans_initialization(self, K, X):
-		N = X.shape[0] 
+		N = X.shape[0]
 		centers_indices = self.select_random_integers_without_replacement(K, N)
 		partition = np.zeros(X.shape[0])
 
@@ -89,29 +89,29 @@ class InitialPartition:
 
 			for j in range(K):
 				cur_distance = self.calculate_euclidean_distance(X[i], X[centers_indices[j]])
-				
+
 				if(cur_distance < min_distance):
 					min_distance = cur_distance
 					partition[i] = j
 
-		return np.unique(partition), partition	
-	
+		return np.unique(partition), partition
+
 	def calculate_initial_partition(self, K, X, kernel_matrix, method):
-		if method == 'Froggy':
-			print("Executing Froggy Initialization")
-			return self.calculate_initial_partition_with_froggy_initialization(K, X.shape[0])
-		
+		if method == 'Forgy':
+			print("Executing Forgy Initialization")
+			return self.calculate_initial_partition_with_forgy_initialization(K, X.shape[0])
+
 		elif method == 'kMeans':
 			print("Executing kMeans Initialization")
 			return self.calculate_initial_partition_with_kmeans_initialization(K, X)
-		
+
 		elif method == 'kMeans++':
-			print("Executing Froggy Initialization")
+			print("Executing Forgy Initialization")
 			raise Exception("Error! You didn't choose an existing initialization method!")
-		
+
 		elif method == 'KkMeans++':
 			print("Executing KkMeans++ Initialization")
 			return self.calculate_initial_partition_with_kkmeans_pp_initialization(K, X, kernel_matrix)
-		
+
 		else:
-			raise Exception("Error! You didn't choose an existing initialization method!") 
+			raise Exception("Error! You didn't choose an existing initialization method!")
