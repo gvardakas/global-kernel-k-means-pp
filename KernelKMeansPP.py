@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
 import math
 from InitialPartition import InitialPartition
 
@@ -35,6 +36,7 @@ class KernelKMeansPP:
             are_equal = np.array_equal(initial_partition, next_partition)
             if(are_equal):
                 print(f"\n Finished in {iter} iterations!")
+                print(f"\n Total Error is: {total_error}!")
                 return np.unique(next_partition), next_partition, total_error
             else:
                 initial_partition = next_partition
@@ -43,13 +45,14 @@ class KernelKMeansPP:
     # 6 are good
     def kernel_kmeans_pp(self, X, K, kernel_matrix, n_init=1, method = 'KkMeans++'):
         min_total_error = math.inf
-
+        best_partition = []
+        
         for _ in range(n_init):
             centers_indices, partition = self.initialPartition.calculate_initial_partition(K, X, kernel_matrix, method)
             centers_indices, partition, total_error = self.custom_kernel_kmeans(X, centers_indices, initial_partition = partition, kernel_matrix=kernel_matrix, max_iter=300, tol=1e-4)
-            print(f"\n centers_indices are: {centers_indices}!")
+            
             if(total_error < min_total_error):
                 min_total_error = total_error
-                
-                plt.scatter(X[:, 0], X[:, 1], c = partition)
-                plt.show()
+                best_partition = partition
+
+        return min_total_error, partition        
