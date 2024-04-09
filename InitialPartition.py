@@ -9,6 +9,9 @@ class InitialPartition:
 	def __init__(self, seed = 42):
 		self.rs = check_random_state(seed)
 
+	def calculate_clusters_labels(self, K):
+		return np.arange(K)
+
 	def get_initial_center_index(self, N):
 		return random.randint(0, N - 1)
 
@@ -50,11 +53,11 @@ class InitialPartition:
 
 		return minimum_distances, partition
 
-	def scale_partition(self, partition):
+	def scale_partition(self, K, partition):
 		partition = LabelEncoder().fit_transform(partition)
-		centers_indices = np.unique(partition)
+		clusters_labels = self.calculate_clusters_labels(K)
 
-		return centers_indices, partition
+		return clusters_labels, partition
 
 	def calculate_initial_partition_with_kkmeans_pp_initialization(self, K, X, kernel_matrix):
 		centers_indices = []
@@ -71,13 +74,12 @@ class InitialPartition:
 			minimum_distances, partition = self.calculate_minimum_distances_from_centers_and_partition(centers_indices, kernel_distances_between_points)
 			probabilities = self.calculate_points_probabilities_to_be_selected(minimum_distances)
 
-		return self.scale_partition(partition)
+		return self.scale_partition(K, partition)
 
 	def calculate_initial_partition_with_forgy_initialization(self, K, N):
 		partition = self.rs.randint(K, size=N)
-		centers_indices = np.unique(partition)
-
-		return centers_indices, partition
+		
+		return self.scale_partition(K, partition)
 
 	def select_random_integers_without_replacement(self, K, N):
 		return random.sample(range(N), K)
@@ -116,7 +118,7 @@ class InitialPartition:
 		for i in range(N):
 			partition[i] = self.calculate_point_cluster_assignment(K, X, i, centers_indices, kernel_matrix, method)
 
-		return np.unique(partition), partition
+		return self.scale_partition(K, partition)
 
 	def calculate_initial_partition(self, K, X, kernel_matrix, method):
 		if method == 'Forgy':
