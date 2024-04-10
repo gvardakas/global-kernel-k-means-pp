@@ -6,7 +6,7 @@ import math
 
 class InitialPartition:
 
-	def __init__(self, seed = 42):
+	def __init__(self, seed=42):
 		self.rs = check_random_state(seed)
 
 	def calculate_clusters_labels(self, K):

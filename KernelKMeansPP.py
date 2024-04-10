@@ -20,7 +20,6 @@ class KernelKMeansPP:
         for iter in range(max_iter):
             
             for i in range(n_clusters):
-                print(clusters_labels)
                 cluster_indices = self.find_cluster_indices(initial_partition, clusters_labels[i])
                 n_cluster_samples =  len(cluster_indices)
 
@@ -40,7 +39,7 @@ class KernelKMeansPP:
             
             min_distances = np.min(distances, axis=0)
             total_error = np.sum(min_distances)
-            print(f"\n Total Error is: {total_error}!")
+            #print(f"\n Total Error is: {total_error}!")
             
             next_partition = np.argmin(distances, axis=0)
             are_equal = np.array_equal(initial_partition, next_partition)
