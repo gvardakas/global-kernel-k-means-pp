@@ -12,7 +12,7 @@ class KernelKMeans:
     def find_cluster_indices(self, labels_, cluster_label):
         return np.where(labels_ == cluster_label)[0]
 
-    def custom_kernel_kmeans(self, N, clusters_labels, initial_labels_, kernel_matrix):
+    def fast_custom_kernel_kmeans(self, N, clusters_labels, initial_labels_, kernel_matrix):
         n_clusters = len(clusters_labels)
         distances = np.zeros((n_clusters, N))
         iter = 0
@@ -46,7 +46,7 @@ class KernelKMeans:
             previous_labels_ = current_labels_
             iter += 1 
 
-    def custom_kernel_kmeans_qq(self, N, clusters_labels, initial_labels_, kernel_matrix):
+    def fast_custom_kernel_kmeans(self, N, clusters_labels, initial_labels_, kernel_matrix):
         n_clusters = len(clusters_labels)
         distances = np.zeros((n_clusters, N))
         iter = 0
@@ -93,7 +93,7 @@ class KernelKMeans:
         
         for _ in range(n_init):
             clusters_labels, initial_labels_ = self.initialization.calculate_initial_partition(K, X, kernel_matrix, method)
-            labels_, total_error = self.custom_kernel_kmeans(N, clusters_labels, initial_labels_ = initial_labels_, kernel_matrix=kernel_matrix)
+            labels_, total_error = self.fast_custom_kernel_kmeans(N, clusters_labels, initial_labels_ = initial_labels_, kernel_matrix=kernel_matrix)
             
             if(total_error < min_total_error):
                 min_total_error = total_error
