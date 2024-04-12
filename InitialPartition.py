@@ -59,9 +59,8 @@ class InitialPartition:
 
 		return clusters_labels, partition
 
-	def calculate_initial_partition_with_kkmeans_pp_initialization(self, K, X, kernel_matrix):
+	def kkmeans_pp_initialization(self, K, N, kernel_matrix):
 		centers_indices = []
-		N = X.shape[0]
 		kernel_distances_between_points = np.zeros((N, N))
 
 		for i in range(K):
@@ -76,7 +75,7 @@ class InitialPartition:
 
 		return self.scale_partition(K, partition)
 
-	def calculate_initial_partition_with_forgy_initialization(self, K, N):
+	def forgy_initialization(self, K, N):
 		partition = self.rs.randint(K, size=N)
 		
 		return self.scale_partition(K, partition)
@@ -84,25 +83,12 @@ class InitialPartition:
 	def select_random_integers_without_replacement(self, K, N):
 		return random.sample(range(N), K)
 
-	def calculate_euclidean_distance(self, x1, x2):
-		return np.sqrt(np.sum((x1 - x2) ** 2))
-
-	def calculate_distance(self, X, i, j, kernel_matrix, method):
-		if method == 'kMeans':
-			return self.calculate_euclidean_distance(X[i], X[j])
-		
-		elif method == 'KkMeans':
-			return self.calculate_kernel_distance_between_points(i, j, kernel_matrix)
-		
-		else:
-			raise Exception("Error! You didn't choose an existing calculate distance method!")
-
-	def calculate_point_cluster_assignment(self, K, X, i, centers_indices, kernel_matrix, method):
+	def calculate_point_cluster_assignment(self, K, i, centers_indices, kernel_matrix):
 		min_distance = math.inf
 		cluster_assignment = -1
 
 		for j in range(K):
-			cur_distance = self.calculate_distance(X, i, centers_indices[j], kernel_matrix, method)
+			cur_distance =  self.calculate_kernel_distance_between_points(i, centers_indices[j], kernel_matrix)
 
 			if(cur_distance < min_distance):
 				min_distance = cur_distance
@@ -110,36 +96,28 @@ class InitialPartition:
 
 		return cluster_assignment 		
 
-	def calculate_initial_partition_with_kmeans_initialization(self, K, X, kernel_matrix, method='kMeans'):
-		N = X.shape[0]
-		centers_indices = self.select_random_integers_without_replacement(K, N)
+	def random_initialization(self, K, N, kernel_matrix):
 		partition = np.zeros(N)
+		centers_indices = self.select_random_integers_without_replacement(K, N)
 
 		for i in range(N):
-			partition[i] = self.calculate_point_cluster_assignment(K, X, i, centers_indices, kernel_matrix, method)
+			partition[i] = self.calculate_point_cluster_assignment(K, i, centers_indices, kernel_matrix)
 
 		return self.scale_partition(K, partition)
 
 	def calculate_initial_partition(self, K, X, kernel_matrix, method):
-		if method == 'Forgy':
+		N = X.shape[0]
+		if method == 'forgy':
 			print("Executing Forgy Initialization")
-			return self.calculate_initial_partition_with_forgy_initialization(K, X.shape[0])
+			return self.forgy_initialization(K, N)
 
-		elif method == 'kMeans':
-			print("Executing kMeans Initialization")
-			return self.calculate_initial_partition_with_kmeans_initialization(K, X, kernel_matrix, method)
+		elif method == 'random':
+			print("Executing Random Initialization")
+			return self.random_initialization(K, N, kernel_matrix)	
 
-		elif method == 'KkMeans':
-			print("Executing KkMeans Initialization")
-			return self.calculate_initial_partition_with_kmeans_initialization(K, X, kernel_matrix, method)	
-
-		elif method == 'kMeans++':
-			print("Executing Forgy Initialization")
-			raise Exception("Error! You didn't choose an existing initialization method!")
-
-		elif method == 'KkMeans++':
-			print("Executing KkMeans++ Initialization")
-			return self.calculate_initial_partition_with_kkmeans_pp_initialization(K, X, kernel_matrix)
+		elif method == 'k-means++':
+			print("Executing Kerenl k-Means++ Initialization")
+			return self.kkmeans_pp_initialization(K, N, kernel_matrix)
 
 		else:
 			raise Exception("Error! You didn't choose an existing initialization method!")
