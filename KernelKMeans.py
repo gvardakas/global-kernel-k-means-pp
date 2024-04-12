@@ -45,6 +45,45 @@ class KernelKMeans:
             print(f'Iter: {iter} Cl L: {total_error:.4f}')
             previous_labels_ = current_labels_
             iter += 1 
+
+    def custom_kernel_kmeans_qq(self, N, clusters_labels, initial_labels_, kernel_matrix):
+        n_clusters = len(clusters_labels)
+        distances = np.zeros((n_clusters, N))
+        iter = 0
+        previous_labels_ = initial_labels_
+            
+        while(True):
+
+            # Precompute kernel_matrix[j,j] and store it in a variable
+            kernel_diag = np.diag(kernel_matrix)
+
+            iter = 0
+            while True:
+                distances = np.zeros((n_clusters, N))
+                for i in range(n_clusters):
+                    cluster_indices = self.find_cluster_indices(previous_labels_, clusters_labels[i])
+                    n_cluster_samples = len(cluster_indices)
+
+                    stable_sum = np.sum(kernel_matrix[np.ix_(cluster_indices, cluster_indices)]) / (n_cluster_samples ** 2)
+
+                    sample_sums = np.sum(kernel_matrix[:, cluster_indices], axis=1) / n_cluster_samples
+
+                    distances[i] = kernel_diag - 2 * sample_sums + stable_sum
+
+                min_distances = np.min(distances, axis=0)
+                total_error = np.sum(min_distances)
+
+                current_labels_ = np.argmin(distances, axis=0)
+                are_equal = np.array_equal(previous_labels_, current_labels_)
+
+                if are_equal:
+                    print(f'Finished in Iter: {iter} Cl L: {total_error:.4f}')
+                    return current_labels_, total_error
+
+                print(f'Iter: {iter} Cl L: {total_error:.4f}')
+                previous_labels_ = current_labels_
+                iter += 1
+
         
 
     def kernel_kmeans(self, X, K, kernel_matrix, n_init=10, method = 'k-means++'):
