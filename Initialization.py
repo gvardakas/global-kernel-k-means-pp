@@ -4,7 +4,7 @@ from sklearn.preprocessing import LabelEncoder
 import random
 import math
 
-class InitialPartition:
+class Initialization:
 
 	def __init__(self, seed=42):
 		self.rs = check_random_state(seed)
