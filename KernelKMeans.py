@@ -1,13 +1,11 @@
 import numpy as np
 import math
 from Initialization import Initialization
-from Common_Modules.Evaluation import Evaluator
 
 class KernelKMeans:
 
     def __init__(self):
         self.initialization = Initialization()
-        self.evaluator = Evaluator()
 
     def find_cluster_indices(self, labels_, cluster_label):
         return np.where(labels_ == cluster_label)[0]
