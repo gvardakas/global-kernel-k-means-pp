@@ -29,6 +29,7 @@ class GlobalKernelKMeans:
             
             total_min_total_errors.append(min_k_total_error)
             total_best_k_labels_.append(best_k_labels_)
-            best_labels_ = best_k_labels_        
-        
+            min_total_error = min_k_total_error
+            best_labels_ = best_k_labels_
+            
         return min_total_error, best_labels_, total_min_total_errors, total_best_k_labels_     
