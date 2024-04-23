@@ -104,8 +104,16 @@ class Initialization:
 			partition[i] = self.calculate_point_cluster_assignment(K, i, centers_indices, kernel_matrix)
 
 		return self.scale_partition(K, partition)
+	
+	def global_initiialization(self, K, N, partition, index):
+		if (K == 2): 
+			partition = np.zeros(N)
+		
+		partition[index] = K-1
 
-	def calculate_initial_partition(self, K, X, kernel_matrix, method):
+		return self.scale_partition(K, partition) 
+	
+	def calculate_initial_partition(self, K, X, kernel_matrix, method, partition = None, index = None):
 		N = X.shape[0]
 		if method == 'forgy':
 			print("Executing Forgy Initialization")
@@ -116,8 +124,12 @@ class Initialization:
 			return self.random_initialization(K, N, kernel_matrix)	
 
 		elif method == 'k-means++':
-			print("Executing Kerenl k-Means++ Initialization")
+			print("Executing Kernel k-Means++ Initialization")
 			return self.kkmeans_pp_initialization(K, N, kernel_matrix)
 
+		elif method == "global":
+			print("Executing Global Initialization")
+			return self.global_initiialization(K, N, partition, index)
+		
 		else:
 			raise Exception("Error! You didn't choose an existing initialization method!")
