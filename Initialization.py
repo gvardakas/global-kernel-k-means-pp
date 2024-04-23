@@ -113,7 +113,7 @@ class Initialization:
 
 		return self.scale_partition(K, partition) 
 	
-	def calculate_initial_partition(self, K, X, kernel_matrix, method, partition = None, index = None):
+	def calculate_initial_partition(self, K, X, kernel_matrix, method, initial_partition = None, index = None):
 		N = X.shape[0]
 		if method == 'forgy':
 			print("Executing Forgy Initialization")
@@ -129,7 +129,7 @@ class Initialization:
 
 		elif method == "global":
 			print("Executing Global Initialization")
-			return self.global_initiialization(K, N, partition, index)
+			return self.global_initiialization(K, N, initial_partition, index)
 		
 		else:
 			raise Exception("Error! You didn't choose an existing initialization method!")
