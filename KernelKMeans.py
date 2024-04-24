@@ -59,17 +59,17 @@ class KernelKMeans:
 
     def fit(self, X):
         self.min_total_error = math.inf
-        self.best_labels_ = []
+        self.labels_ = []
         N = X.shape[0]
         
         for _ in range(self.n_init):
             if(self.initial_labels_ is None):    
                 self.initial_labels_ = self.initialization.calculate_initial_partition(self.K, X, self.kernel_matrix, self.method)
 
-            labels_, total_error = self.kernel_kmeans_functionallity(N, initial_labels_ = self.initial_labels_, kernel_matrix=self.kernel_matrix)
+            current_labels_, total_error = self.kernel_kmeans_functionallity(N, initial_labels_ = self.initial_labels_, kernel_matrix=self.kernel_matrix)
             
             self.initial_labels_ = None
 
             if(total_error < self.min_total_error):
                 self.min_total_error = total_error
-                self.best_labels_ = labels_
+                self.labels_ = current_labels_
