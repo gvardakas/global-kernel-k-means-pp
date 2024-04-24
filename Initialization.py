@@ -9,7 +9,7 @@ class Initialization:
 	def __init__(self, seed=42):
 		self.rs = check_random_state(seed)
 
-	def calculate_clusters_labels(self, K):
+	def calculate_clusters_identities(self, K):
 		return np.arange(K)
 
 	def get_initial_center_index(self, N):
@@ -55,9 +55,9 @@ class Initialization:
 
 	def scale_partition(self, K, partition):
 		partition = LabelEncoder().fit_transform(partition)
-		clusters_labels = self.calculate_clusters_labels(K)
+		clusters_identities = self.calculate_clusters_identities(K)
 
-		return clusters_labels, partition
+		return clusters_identities, partition
 
 	def kkmeans_pp_initialization(self, K, N, kernel_matrix):
 		centers_indices = []
@@ -73,12 +73,10 @@ class Initialization:
 			minimum_distances, partition = self.calculate_minimum_distances_from_centers_and_partition(centers_indices, kernel_distances_between_points)
 			probabilities = self.calculate_points_probabilities_to_be_selected(minimum_distances)
 
-		return self.scale_partition(K, partition)
+		return partition
 
 	def forgy_initialization(self, K, N):
-		partition = self.rs.randint(K, size=N)
-		
-		return self.scale_partition(K, partition)
+		return self.rs.randint(K, size=N)
 
 	def select_random_integers_without_replacement(self, K, N):
 		return random.sample(range(N), K)
@@ -103,17 +101,9 @@ class Initialization:
 		for i in range(N):
 			partition[i] = self.calculate_point_cluster_assignment(K, i, centers_indices, kernel_matrix)
 
-		return self.scale_partition(K, partition)
+		return partition
 	
-	def global_initiialization(self, K, N, partition, index):
-		if (K == 2): 
-			partition = np.zeros(N)
-		
-		partition[index] = K-1
-
-		return self.scale_partition(K, partition) 
-	
-	def calculate_initial_partition(self, K, X, kernel_matrix, method, initial_partition = None, index = None):
+	def calculate_initial_partition(self, K, X, kernel_matrix, method):
 		N = X.shape[0]
 		if method == 'forgy':
 			print("Executing Forgy Initialization")
@@ -126,10 +116,6 @@ class Initialization:
 		elif method == 'k-means++':
 			print("Executing Kernel k-Means++ Initialization")
 			return self.kkmeans_pp_initialization(K, N, kernel_matrix)
-
-		elif method == "global":
-			print("Executing Global Initialization")
-			return self.global_initiialization(K, N, initial_partition, index)
 		
 		else:
 			raise Exception("Error! You didn't choose an existing initialization method!")
