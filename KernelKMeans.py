@@ -18,7 +18,6 @@ class KernelKMeans:
     def kernel_kmeans_functionallity(self, N, initial_labels_, kernel_matrix):
         clusters_identities, initial_labels_ = self.initialization.scale_partition(self.n_clusters, initial_labels_)
         distances = np.zeros((self.n_clusters, N))
-        iter = 0
         previous_labels_ = initial_labels_
             
         while(True):
@@ -26,7 +25,7 @@ class KernelKMeans:
             # Precompute kernel_matrix[j,j] and store it in a variable
             kernel_diag = np.diag(kernel_matrix)
 
-            iter = 0
+            self.n_iter_ = 0
             while True:
                 distances = np.zeros((self.n_clusters, N))
                 for i in range(self.n_clusters):
@@ -43,21 +42,21 @@ class KernelKMeans:
                     distances[i] = kernel_diag - 2 * sample_sums + stable_sum
 
                 min_distances = np.min(distances, axis=0)
-                total_error = np.sum(min_distances)
+                inertia_ = np.sum(min_distances)
 
                 current_labels_ = np.argmin(distances, axis=0)
                 are_equal = np.array_equal(previous_labels_, current_labels_)
 
                 if are_equal:
-                    print(f'Finished in Iter: {iter} Cl L: {total_error:.4f}')
-                    return current_labels_, total_error
+                    print(f'Finished in Iter: {self.n_iter_} Cl L: {inertia_:.4f}')
+                    return current_labels_, inertia_
 
-                print(f'Iter: {iter} Cl L: {total_error:.4f}')
+                print(f'Iter: {self.n_iter_} Cl L: {inertia_:.4f}')
                 previous_labels_ = current_labels_
-                iter += 1
+                self.n_iter_ += 1
 
     def fit(self, X):
-        self.min_total_error = math.inf
+        self.inertia_ = math.inf
         self.labels_ = []
         N = X.shape[0]
         
@@ -65,10 +64,12 @@ class KernelKMeans:
             if(self.initial_labels_ is None):    
                 self.initial_labels_ = self.initialization.calculate_initial_partition(self.n_clusters, X, self.kernel_matrix, self.init)
 
-            current_labels_, total_error = self.kernel_kmeans_functionallity(N, initial_labels_ = self.initial_labels_, kernel_matrix=self.kernel_matrix)
+            current_labels_, current_inertia_ = self.kernel_kmeans_functionallity(N, initial_labels_ = self.initial_labels_, kernel_matrix=self.kernel_matrix)
             
             self.initial_labels_ = None
 
-            if(total_error < self.min_total_error):
-                self.min_total_error = total_error
+            if(current_inertia_ < self.inertia_):
+                self.inertia_ = current_inertia_
                 self.labels_ = current_labels_
+        
+        return self        
