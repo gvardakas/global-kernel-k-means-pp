@@ -6,11 +6,8 @@ class Rings:
 	def __init__(self, seed=42):
 		self.seed = seed
 
-	def remove_samples(self, N, y, label):
-		label_indices = np.where(np.array(y) == label)[0]
-
-		indices_to_remove = np.random.choice(label_indices, size=N, replace=False)
-
+	def remove_samples_with_specific_label(self, X, y, label):
+		indices_to_remove = np.where(np.array(y) == label)[0]
 		X = np.delete(X, indices_to_remove, axis=0)
 		y = np.delete(y, indices_to_remove)
 
