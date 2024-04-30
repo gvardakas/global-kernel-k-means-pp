@@ -106,15 +106,12 @@ class Initialization:
 	def calculate_initial_partition(self, K, X, kernel_matrix, method):
 		N = X.shape[0]
 		if method == 'forgy':
-			print("Executing Forgy Initialization")
 			return self.forgy_initialization(K, N)
 
 		elif method == 'random':
-			print("Executing Random Initialization")
 			return self.random_initialization(K, N, kernel_matrix)	
 
 		elif method == 'k-means++':
-			print("Executing Kernel k-Means++ Initialization")
 			return self.kkmeans_pp_initialization(K, N, kernel_matrix)
 		
 		else:
