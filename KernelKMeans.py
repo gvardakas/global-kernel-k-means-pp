@@ -43,7 +43,7 @@ class KernelKMeans:
                 distances = np.zeros((self.n_clusters, N))
                 for i in range(self.n_clusters):
                     cluster_indices = np.where(previous_labels_ == clusters_identities[i])[0]
-
+                    
                     n_cluster_samples = len(cluster_indices)
                     stable_sum = np.sum(kernel_matrix[np.ix_(cluster_indices, cluster_indices)]) / (n_cluster_samples ** 2)
                     sample_sums = np.sum(kernel_matrix[:, cluster_indices], axis=1) / n_cluster_samples
