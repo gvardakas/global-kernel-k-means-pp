@@ -75,7 +75,6 @@ class _BaseGlobalKernelKMeans(BaseEstimator, ClusterMixin, TransformerMixin, ABC
 		self.fit(X, y, sample_weight)
 		return self.predict(X)
 
-
 class GlobalKernelKMeans(_BaseGlobalKernelKMeans):
 	"""Global Kernel K-Means clustering algorithm.
 
