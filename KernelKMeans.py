@@ -109,7 +109,7 @@ class KernelKMeans(_BaseKernelKMeans):
         
         return np.sum(min_distances)
 
-    def kernel_kmeans_functionallity(self, N, initial_labels_, kernel_matrix):
+    def __kernel_kmeans_functionallity(self, N, initial_labels_, kernel_matrix):
         clusters_identities, initial_labels_ = self.initialization.scale_partition(self.n_clusters, initial_labels_)
         distances = np.zeros((self.n_clusters, N))
         previous_labels_ = initial_labels_
@@ -159,7 +159,7 @@ class KernelKMeans(_BaseKernelKMeans):
             if(self.initial_labels_ is None):    
                 self.initial_labels_ = self.initialization.calculate_initial_partition(self.n_clusters, X, self.kernel_matrix, self.init)
 
-            current_labels_, current_inertia_ = self.kernel_kmeans_functionallity(N, initial_labels_ = self.initial_labels_, kernel_matrix=self.kernel_matrix)
+            current_labels_, current_inertia_ = self.__kernel_kmeans_functionallity(N, initial_labels_ = self.initial_labels_, kernel_matrix=self.kernel_matrix)
             
             self.initial_labels_ = None
 
