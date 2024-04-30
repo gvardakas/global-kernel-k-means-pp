@@ -19,7 +19,7 @@ class KernelKMeans:
         distances = np.zeros((self.n_clusters, N))
         
         for i in range(self.n_clusters):
-            cluster_indices = self.find_cluster_indices(labels_, clusters_identities[i])
+            cluster_indices = np.where(labels_ == clusters_identities[i])[0]
 
             n_cluster_samples = len(cluster_indices)
             stable_sum = np.sum(self.kernel_matrix[np.ix_(cluster_indices, cluster_indices)]) / (n_cluster_samples ** 2)
@@ -30,9 +30,6 @@ class KernelKMeans:
         min_distances = np.min(distances, axis=0)
         
         return np.sum(min_distances)
-    
-    def find_cluster_indices(self, labels_, cluster_label):
-        return np.where(labels_ == cluster_label)[0]
 
     def kernel_kmeans_functionallity(self, N, initial_labels_, kernel_matrix):
         clusters_identities, initial_labels_ = self.initialization.scale_partition(self.n_clusters, initial_labels_)
@@ -45,7 +42,7 @@ class KernelKMeans:
         while True:
                 distances = np.zeros((self.n_clusters, N))
                 for i in range(self.n_clusters):
-                    cluster_indices = self.find_cluster_indices(previous_labels_, clusters_identities[i])
+                    cluster_indices = np.where(previous_labels_ == clusters_identities[i])[0]
 
                     n_cluster_samples = len(cluster_indices)
                     stable_sum = np.sum(kernel_matrix[np.ix_(cluster_indices, cluster_indices)]) / (n_cluster_samples ** 2)
