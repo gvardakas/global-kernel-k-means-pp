@@ -12,7 +12,6 @@ class _BaseGlobalKernelKMeans(BaseEstimator, ClusterMixin, TransformerMixin, ABC
 		----------
 			n_clusters (int) : The number of clusters to form and the number of centroids to generate.
 			kernel_matrix (numpy.array) : The kernel matrix array.
-			tol (float) : Relative tolerance with regards to Frobenius norm of the difference in the cluster centers of two consecutive iterations to declare convergence.
 			verbose (int) : Verbosity mode.
 
 		Attributes
@@ -21,10 +20,9 @@ class _BaseGlobalKernelKMeans(BaseEstimator, ClusterMixin, TransformerMixin, ABC
 			labels_ (dict) : Dictionary to store cluster labels for each sub-problem k.
 			inertia_ (dict) : Dictionary to store inertia values for each sub-problem k.
 	"""
-	def __init__(self, n_clusters, kernel_matrix, tol, verbose):
+	def __init__(self, n_clusters, kernel_matrix, verbose):
 		self.n_clusters = n_clusters
 		self.kernel_matrix = kernel_matrix
-		self.tol = tol
 		self.verbose = verbose
 
 		self.n_iter_ = 0
@@ -84,7 +82,6 @@ class GlobalKernelKMeans(_BaseGlobalKernelKMeans):
 		Parameters:
 			n_clusters (int) : The number of clusters to form and the number of centroids to generate.
 			kernel_matrix (numpy.array) : The kernel matrix array.
-			tol (float) : Relative tolerance with regards to Frobenius norm of the difference in the cluster centers of two consecutive iterations to declare convergence.
 			verbose (int) : Verbosity mode.
 
 		Attributes
@@ -94,11 +91,10 @@ class GlobalKernelKMeans(_BaseGlobalKernelKMeans):
 			inertia_ (dict) : Dictionary to store inertia values for each sub-problem k.
 
 	"""
-	def __init__(self, n_clusters=8, kernel_matrix=None, tol=1e-4, verbose=0):
+	def __init__(self, n_clusters=8, kernel_matrix=None, verbose=0):
 		super().__init__(
 			n_clusters=n_clusters,
 			kernel_matrix=kernel_matrix,
-			tol=tol,
 			verbose=verbose,
 		)
 	
@@ -149,7 +145,6 @@ class GlobalKernelKMeansPP(_BaseGlobalKernelKMeans):
 			kernel_matrix (numpy.array) : The kernel matrix array.
 			n_candidates (int) : The number of centroid candidates to examine.
 			sampling (str): The sampling method utilized for the centroid candidates ('batch' or 'sequential').
-			tol (float) : Relative tolerance with regards to Frobenius norm of the difference in the cluster centers of two consecutive iterations to declare convergence.
 			verbose (int) : Verbosity mode.
 				
 		Attributes
@@ -159,11 +154,10 @@ class GlobalKernelKMeansPP(_BaseGlobalKernelKMeans):
 			inertia_ (dict) : Dictionary to store inertia values for each sub-problem k.
 			cluster_distance_space_(dict) : Dictionary to store the distance of each data point to the nearest centroid.
 	"""
-	def __init__(self, n_clusters=8, kernel_matrix=None, n_candidates=25, sampling='batch', tol=1e-4, verbose=0):
+	def __init__(self, n_clusters=8, kernel_matrix=None, n_candidates=25, sampling='batch', verbose=0):
 		super().__init__(
 			n_clusters=n_clusters,
 			kernel_matrix=kernel_matrix,
-			tol=tol,
 			verbose=verbose,
 		)
 		self.n_candidates = n_candidates
@@ -197,10 +191,8 @@ class GlobalKernelKMeansPP(_BaseGlobalKernelKMeans):
 				print(f'Solving {k}-means')
 				
 			centroid_candidates = self._sampling(X, self.cluster_distance_space_[k-1])
-			
 			self.inertia_[k] = float('inf')
-			for i, xi in enumerate(centroid_candidates): # TODO parallel
-				
+			for i in centroid_candidates: # TODO parallel
 				prev_xi_label = initial_labels_[i]
 				initial_labels_[i] = k-1
 				
@@ -212,7 +204,6 @@ class GlobalKernelKMeansPP(_BaseGlobalKernelKMeans):
 					self.labels_[k] = kernelKMeans.labels_
 					self.inertia_[k] = kernelKMeans.inertia_
 					self.cluster_distance_space_[k] = kernelKMeans.min_distances
-
 			initial_labels_ = self.labels_[k]
 			
 		return self
@@ -230,7 +221,7 @@ class GlobalKernelKMeansPP(_BaseGlobalKernelKMeans):
 		sum_distance = np.sum(cluster_distance_space)
 		selection_prob = cluster_distance_space / sum_distance
 		selected_indexes = np.random.choice(self.n_data, size=self.n_candidates, p=selection_prob, replace=False) 
-		return X[selected_indexes]
+		return selected_indexes
 	
 	def _kernel_kmeans_pp_sequential(self, X, cluster_distance_space):
 		selected_indexes = np.zeros(shape=(self.n_candidates), dtype=np.int32)       
@@ -249,4 +240,4 @@ class GlobalKernelKMeansPP(_BaseGlobalKernelKMeans):
 			for i, _ in enumerate(cluster_distance_space):
 				if candidate_data_distances[i] < cluster_distance_space[i]:
 					cluster_distance_space[i] = candidate_data_distances[i]
-		return X[selected_indexes]
+		return selected_indexes
