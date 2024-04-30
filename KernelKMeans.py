@@ -1,16 +1,94 @@
+from abc import ABC, abstractmethod
 import numpy as np
+from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 import math
 from Initialization import Initialization
 
-class KernelKMeans:
+class _BaseKernelKMeans(BaseEstimator, ClusterMixin, TransformerMixin, ABC):
+	"""Base class for Kernel K-Means, Kernel K-Means++ and future (or past) variants.
 
-    def __init__(self, n_clusters, kernel_matrix, n_init=10, init='k-means++', initial_labels_=None):
-        self.initialization = Initialization()
-        self.n_clusters = n_clusters
-        self.kernel_matrix = kernel_matrix
-        self.n_init = n_init
-        self.init = init
-        self.initial_labels_ = initial_labels_
+		Parameters
+		----------
+			n_clusters (int) : The number of clusters to form and the number of centroids to generate.
+			kernel_matrix (numpy.array) : The kernel matrix array.
+			verbose (int) : Verbosity mode.
+
+		Attributes
+		----------
+			n_iter_ (int) : The total number of KMeans iterations.
+			labels_ (dict) : Dictionary to store cluster labels for each sub-problem k.
+			inertia_ (dict) : Dictionary to store inertia values for each sub-problem k.
+	"""
+	def __init__(self, n_clusters, kernel_matrix, n_init, init, initial_labels_, verbose):
+		self.n_clusters = n_clusters
+		self.kernel_matrix = kernel_matrix
+		self.n_init = n_init
+		self.init = init
+		self.initial_labels_=initial_labels_
+		self.verbose = verbose
+
+		self.initialization = Initialization()
+		self.n_iter_ = 0
+		self.labels_ = {}
+		self.inertia_ = {}
+
+	@abstractmethod	
+	def fit(self, X, y=None, sample_weight=None):
+		"""Abstract method for fitting the model to the data.
+
+		Parameters
+		----------
+			X (array-like) : Input data.
+			y : Ignored
+			sample_weight : Ignored
+
+		Returns
+		----------
+			self: Fitted estimator.
+		"""
+		return self
+
+	def predict(self, X=None):
+		"""Predict cluster labels for data X with n_clusters clusters.
+
+		Parameters
+		----------
+			X : Ignored. Models should already be fitted.
+
+		Returns
+		----------
+			labels_ (array) : Cluster labels.
+		"""
+		return self.labels_[self.n_clusters]
+
+	def fit_predict(self, X, y=None, sample_weight=None):
+		"""Compute cluster centers and predict cluster index for each sample.
+
+        Convenience method; equivalent to calling fit(X) followed by predict(X).
+
+
+		Parameters
+		----------
+			X (array-like) : Input data.
+
+		Returns
+		----------
+			labels_ (array) : Cluster labels.
+		"""
+		self.fit(X, y, sample_weight)
+		return self.predict(X)
+
+class KernelKMeans(_BaseKernelKMeans):
+
+    def __init__(self, n_clusters, kernel_matrix, n_init=10, init='k-means++', initial_labels_=None, verbose=0):
+        super().__init__(
+			n_clusters=n_clusters,
+			kernel_matrix=kernel_matrix,
+			n_init=n_init,
+			init=init,
+			initial_labels_=initial_labels_,
+			verbose=verbose,
+		)
     
     def calculate_ground_truth_error(self, labels_):
         clusters_identities, labels_ = self.initialization.scale_partition(self.n_clusters, labels_)
