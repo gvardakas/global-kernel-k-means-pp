@@ -103,8 +103,7 @@ class Initialization:
 
 		return partition
 	
-	def calculate_initial_partition(self, K, X, kernel_matrix, method):
-		N = X.shape[0]
+	def calculate_initial_partition(self, K, N, kernel_matrix, method):
 		if method == 'forgy':
 			return self.forgy_initialization(K, N)
 

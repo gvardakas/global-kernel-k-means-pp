@@ -82,7 +82,7 @@ class _BaseKernelKMeans(BaseEstimator, ClusterMixin, TransformerMixin, ABC):
 
 class KernelKMeans(_BaseKernelKMeans):
 
-    def __init__(self, n_clusters, kernel_matrix, n_init=10, init='k-means++', initial_labels_=None, tol=1e-4, verbose=0):
+    def __init__(self, n_clusters, kernel_matrix, n_init=10, init='k-means++', initial_labels_=None, tol=1e-20, verbose=0):
         super().__init__(
             n_clusters=n_clusters,
             kernel_matrix=kernel_matrix,
@@ -114,7 +114,6 @@ class KernelKMeans(_BaseKernelKMeans):
 
     def __kernel_kmeans_functionallity(self, initial_labels_, kernel_matrix):
         clusters_identities, initial_labels_ = self.initialization.scale_partition(self.n_clusters, initial_labels_)
-
         distances = np.zeros((self.n_clusters, self.N))
         previous_labels_ = initial_labels_
         previous_inertia_ = math.inf
@@ -138,7 +137,7 @@ class KernelKMeans(_BaseKernelKMeans):
             current_inertia_ = np.sum(self.min_distances)
             current_labels_ = np.argmin(distances, axis=0)
 
-            if (abs(current_inertia_ - previous_inertia_) < self.tol):    
+            if (abs(current_inertia_ - previous_inertia_) < self.tol):   
                 if(self.verbose > 0):
                     print(f'Finished in Iter: {self.n_iter_} Cl L: {current_inertia_:.4f}')
 
@@ -159,9 +158,9 @@ class KernelKMeans(_BaseKernelKMeans):
             if(self.verbose > 0):
                 print(f'Execution {i} of Kernel k-Means with {self.init} initialization')
 
-            if(self.initial_labels_ is None):    
+            if(self.initial_labels_ is None):
                 self.initial_labels_ = self.initialization.calculate_initial_partition(self.n_clusters, self.N, self.kernel_matrix, self.init)
-
+            
             current_labels_, current_inertia_ = self.__kernel_kmeans_functionallity(initial_labels_ = self.initial_labels_, kernel_matrix=self.kernel_matrix)
             
             self.initial_labels_ = None
