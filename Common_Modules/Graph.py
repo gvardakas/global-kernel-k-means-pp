@@ -17,7 +17,14 @@ class Graph:
 
 	def create_kernel_matrix_from_adj_matrix(self, b=0.0001):
 		self.adj_matrix = nx.to_numpy_array(self.G)
+		print(self.adj_matrix)
+		for i in range(self.adj_matrix.shape[0]):
+			for j in range (self.adj_matrix.shape[1]):
+				if(self.adj_matrix[i][j] != 0):
+					self.adj_matrix[i][j] = self.adj_matrix[i][j] + i
+					self.adj_matrix[j][i] = self.adj_matrix[i][j]
 		
+		print(self.adj_matrix)
 		if(not self.modification.check_for_positive_defined_matrix(self.adj_matrix)):
 			self.kernel_matrix = self.modification.modify_kernel_matrix(self.adj_matrix, 0.0001)
 		else:

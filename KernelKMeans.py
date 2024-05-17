@@ -128,15 +128,20 @@ class KernelKMeans(_BaseKernelKMeans):
                 cluster_indices = np.where(previous_labels_ == clusters_identities[i])[0]
                 
                 n_cluster_samples = len(cluster_indices)
-                stable_sum = np.sum(kernel_matrix[np.ix_(cluster_indices, cluster_indices)]) / (n_cluster_samples ** 2)
-                sample_sums = np.sum(kernel_matrix[:, cluster_indices], axis=1) / n_cluster_samples
+                if n_cluster_samples != 0:
+                    stable_sum = np.sum(kernel_matrix[np.ix_(cluster_indices, cluster_indices)]) / (n_cluster_samples ** 2)
+                    sample_sums = np.sum(kernel_matrix[:, cluster_indices], axis=1) / n_cluster_samples
+                else:
+                    sample_sums = np.zeros((1, self.N))
+                    stable_sum = np.zeros((1, self.N))
 
                 distances[i] = kernel_diag - 2 * sample_sums + stable_sum
 
             self.min_distances = np.min(distances, axis=0)
+            #print(previous_labels_)
             current_inertia_ = np.sum(self.min_distances)
             current_labels_ = np.argmin(distances, axis=0)
-
+            #print(current_labels_)
             if (abs(current_inertia_ - previous_inertia_) < self.tol):   
                 if(self.verbose > 0):
                     print(f'Finished in Iter: {self.n_iter_} Cl L: {current_inertia_:.4f}')

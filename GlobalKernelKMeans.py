@@ -4,6 +4,7 @@ from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from KernelKMeans import KernelKMeans
 from sklearn.metrics import pairwise_distances
 from sklearn.utils.validation import check_array
+from Initialization import Initialization
 import sys
 
 class _BaseGlobalKernelKMeans(BaseEstimator, ClusterMixin, TransformerMixin, ABC):
@@ -100,17 +101,39 @@ class GlobalKernelKMeans(_BaseGlobalKernelKMeans):
 			verbose=verbose,
 		)
 
-	def random_initialization(self, K, N, kernel_matrix):
-		
-
 	def tbn(self, i, k, initial_labels_):
-		initial_labels_[i] = k-1
+		#initial_labels_[i] = k-1
 		
-		centers_indices = [i]
+		#centers_indices = [i]
 
-		for i in range(N):
-			initial_labels_[i] = self.calculate_point_cluster_assignment(1, i, centers_indices, self.kernel_matrix)
+		#for i in range(N):
+			#initial_labels_[i] = self.calculate_point_cluster_assignment(1, i, centers_indices, self.kernel_matrix)
+		clusters_identities, initial_labels_ = self.initialization.scale_partition(self.n_clusters, initial_labels_)
+		kernel_diag = np.diag(self.kernel_matrix)
 
+		distances = np.zeros((k, self.N))
+		for j in range(k-1):
+			cluster_indices = np.where(initial_labels_ == clusters_identities[j])[0]
+                
+			n_cluster_samples = len(cluster_indices)
+			#if n_cluster_samples != 0:
+			stable_sum = np.sum(self.kernel_matrix[np.ix_(cluster_indices, cluster_indices)]) / (n_cluster_samples ** 2)
+			sample_sums = np.sum(self.kernel_matrix[:, cluster_indices], axis=1) / n_cluster_samples
+			#else:
+				#sample_sums = np.zeros((1, self.N))
+				#stable_sum = np.zeros((1, self.N))
+
+			distances[j] = kernel_diag - 2 * sample_sums + stable_sum
+		
+		distances[k-1] = [ self.initialization.calculate_kernel_distance_between_points(i, index, self.kernel_matrix) for index in range(self.N)]
+		
+		if(k == 10):
+			print(self.kernel_matrix)
+			print(distances)
+			print(f"prev {initial_labels_}")
+		initial_labels_ = np.argmin(distances, axis=0)
+		if(k == 10):	
+			print(f"after {initial_labels_}")
 		return initial_labels_	
 	def fit(self, X=None, y=None, sample_weight=None):
 		"""Compute the global kernel k-means clustering.
@@ -135,7 +158,7 @@ class GlobalKernelKMeans(_BaseGlobalKernelKMeans):
 			for i in range(self.N): # TODO parallel
 				prev_initial_labels_ = initial_labels_
 
-				initial_labels_ = tbn(i, k, self.kernel_matrix, initial_labels_)
+				initial_labels_ = self.tbn(i, k, initial_labels_)
 
 				kernelKMeans = KernelKMeans(n_clusters=k, kernel_matrix=self.kernel_matrix, n_init=1, initial_labels_=initial_labels_, verbose=self.verbose).fit()
 				self.n_iter_ += kernelKMeans.n_iter_
