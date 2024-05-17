@@ -15,18 +15,26 @@ class Graph:
 		self.colors = colors
 		self.create()
 
-	def create_kernel_matrix_from_adj_matrix(self, b=0.0001):
-		self.adj_matrix = nx.to_numpy_array(self.G)
-		print(self.adj_matrix)
-		for i in range(self.adj_matrix.shape[0]):
-			for j in range (self.adj_matrix.shape[1]):
-				if(self.adj_matrix[i][j] != 0):
-					self.adj_matrix[i][j] = self.adj_matrix[i][j] + i
-					self.adj_matrix[j][i] = self.adj_matrix[i][j]
+	import numpy as np
+
+	def adjacency_to_similarity(self):
+		# Compute row-wise sums (degrees)
+		degrees = np.sum(self.adj_matrix, axis=1)
 		
-		print(self.adj_matrix)
+		# Normalize the adjacency matrix by row sums
+		degree_normalized_adjacency = self.adj_matrix / degrees[:, np.newaxis]
+		
+		# Convert zero division errors to NaN (nodes with no edges)
+		degree_normalized_adjacency[np.isnan(degree_normalized_adjacency)] = 0
+		
+		return degree_normalized_adjacency
+
+	def create_adj_matrix(self):
+		self.adj_matrix = nx.to_numpy_array(self.G)
+
+	def create_kernel_matrix_from_adj_matrix(self, b=0.0001):
 		if(not self.modification.check_for_positive_defined_matrix(self.adj_matrix)):
-			self.kernel_matrix = self.modification.modify_kernel_matrix(self.adj_matrix, 0.0001)
+			self.kernel_matrix = self.modification.modify_kernel_matrix(self.adj_matrix, b)
 		else:
 			self.kernel_matrix = self.adj_matrix
 		

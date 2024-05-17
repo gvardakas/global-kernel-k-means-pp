@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 import math
 from Initialization import Initialization
+import pdb
 
 class _BaseKernelKMeans(BaseEstimator, ClusterMixin, TransformerMixin, ABC):
     """Base class for Kernel K-Means, Kernel K-Means++ and future (or past) variants.
@@ -113,35 +114,27 @@ class KernelKMeans(_BaseKernelKMeans):
         return np.sum(min_distances)
 
     def __kernel_kmeans_functionallity(self, initial_labels_, kernel_matrix):
-        clusters_identities, initial_labels_ = self.initialization.scale_partition(self.n_clusters, initial_labels_)
-        distances = np.zeros((self.n_clusters, self.N))
-        previous_labels_ = initial_labels_
+        clusters_identities, previous_labels_ = self.initialization.scale_partition(self.n_clusters, np.copy(initial_labels_))
         previous_inertia_ = math.inf
 
+        distances = np.zeros((self.n_clusters, self.N))
+        
         kernel_diag = np.diag(kernel_matrix)
         self.n_iter_ = 0
-        
-        distances = np.zeros((self.n_clusters, self.N))
         
         while True:
             for i in range(self.n_clusters):
                 cluster_indices = np.where(previous_labels_ == clusters_identities[i])[0]
-                
                 n_cluster_samples = len(cluster_indices)
-                if n_cluster_samples != 0:
-                    stable_sum = np.sum(kernel_matrix[np.ix_(cluster_indices, cluster_indices)]) / (n_cluster_samples ** 2)
-                    sample_sums = np.sum(kernel_matrix[:, cluster_indices], axis=1) / n_cluster_samples
-                else:
-                    sample_sums = np.zeros((1, self.N))
-                    stable_sum = np.zeros((1, self.N))
-
+                stable_sum = np.sum(kernel_matrix[np.ix_(cluster_indices, cluster_indices)]) / (n_cluster_samples ** 2)
+                sample_sums = np.sum(kernel_matrix[:, cluster_indices], axis=1) / n_cluster_samples
+                
                 distances[i] = kernel_diag - 2 * sample_sums + stable_sum
 
             self.min_distances = np.min(distances, axis=0)
-            #print(previous_labels_)
             current_inertia_ = np.sum(self.min_distances)
             current_labels_ = np.argmin(distances, axis=0)
-            #print(current_labels_)
+            
             if (abs(current_inertia_ - previous_inertia_) < self.tol):   
                 if(self.verbose > 0):
                     print(f'Finished in Iter: {self.n_iter_} Cl L: {current_inertia_:.4f}')
@@ -151,8 +144,9 @@ class KernelKMeans(_BaseKernelKMeans):
             if(self.verbose > 1):
                 print(f'Iter: {self.n_iter_} Cl L: {current_inertia_:.4f}')
             
-            previous_labels_ = current_labels_
+            previous_labels_ = np.copy(current_labels_)
             previous_inertia_ = current_inertia_
+
             self.n_iter_ += 1
 
     def fit(self):

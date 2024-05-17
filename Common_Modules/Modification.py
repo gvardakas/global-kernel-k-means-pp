@@ -16,7 +16,7 @@ class Modification:
 		except LinAlgError: 
 			# It throws LinAlgError if matrix is not positive defined
 			return False
-
+	
 	def modify_kernel_matrix(self, M, b):
 		# Initialize I = identity matrix and t = 0
 		I = np.identity(M.shape[0])
