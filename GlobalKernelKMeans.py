@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 import numpy as np
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
-from KernelKMeans import KernelKMeans
 from sklearn.metrics import pairwise_distances
+from KernelKMeans import KernelKMeans
 
 class _BaseGlobalKernelKMeans(BaseEstimator, ClusterMixin, TransformerMixin, ABC):
 	"""Base class for Global Kernel K-Means, Global Kernel K-Means++ and future (or past) variants.
@@ -12,6 +12,7 @@ class _BaseGlobalKernelKMeans(BaseEstimator, ClusterMixin, TransformerMixin, ABC
 			n_clusters (int) : The number of clusters to form and the number of centroids to generate.
 			kernel_matrix (numpy.array) : The kernel matrix array.
 			verbose (int) : Verbosity mode.
+			N (int) : The number of points.
 
 		Attributes
 		----------
@@ -195,7 +196,7 @@ class GlobalKernelKMeansPP(_BaseGlobalKernelKMeans):
 				
 			centroid_candidates = self._sampling(self.cluster_distance_space_[k-1])
 			self.inertia_[k] = float('inf')
-			for i in centroid_candidates: # TODO parallel
+			for i in centroid_candidates:
 				prev_xi_label = initial_labels_[i]
 				initial_labels_[i] = k-1
 				
@@ -218,7 +219,7 @@ class GlobalKernelKMeansPP(_BaseGlobalKernelKMeans):
 	def _sampling(self, cluster_distance_space):
 		if self.sampling == 'batch':
 			return self._kernel_kmeans_pp_batch(cluster_distance_space)
-		#elif self.sampling == 'sequential':
+		#elif self.sampling == 'sequential': # TODO FIX IT
 			#return self._kernel_kmeans_pp_sequential(X, cluster_distance_space)
 		else:
 			raise ValueError("Wrong sampling method! options = ['batch', 'sequential']")

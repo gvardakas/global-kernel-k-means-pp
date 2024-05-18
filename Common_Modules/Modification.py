@@ -1,7 +1,6 @@
 import numpy as np
 from numpy.linalg import cholesky  
 from numpy.linalg.linalg import LinAlgError
-import networkx as nx
 
 class Modification:
 
@@ -9,7 +8,7 @@ class Modification:
 		pass
 
 	# Implement check for positive defined matrix with cholesky
-	def check_for_positive_defined_matrix(self, M):
+	def check_for_positive_definite_matrix(self, M):
 		try:
 			cholesky(M)
 			return True

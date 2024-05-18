@@ -1,10 +1,17 @@
 import numpy as np
 from sklearn.datasets import make_circles
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
 
 class Rings:
 
-	def __init__(self, seed=42):
+	def __init__(self, colors, seed=42):
+		self.colors = colors
 		self.seed = seed
+
+	def plot(self, X, labels_):
+		plt.scatter(X[:, 0], X[:, 1], c=labels_, cmap=ListedColormap(self.colors))
+		plt.show()
 
 	def remove_samples_with_specific_label(self, X, y, label):
 		indices_to_remove = np.where(np.array(y) == label)[0]
@@ -25,6 +32,8 @@ class Rings:
 	def concatenate_pairs(self, pairs):
 		X = np.concatenate([X for X, _ in pairs])
 		y = np.concatenate([y for _, y in pairs])
+
+		self.plot(X, y)
 
 		return X, y
 
