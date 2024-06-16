@@ -219,8 +219,8 @@ class GlobalKernelKMeansPP(_BaseGlobalKernelKMeans):
 	def _sampling(self, cluster_distance_space):
 		if self.sampling == 'batch':
 			return self._kernel_kmeans_pp_batch(cluster_distance_space)
-		#elif self.sampling == 'sequential': # TODO FIX IT
-			#return self._kernel_kmeans_pp_sequential(X, cluster_distance_space)
+		elif self.sampling == 'sequential': # TODO FIX IT
+			return self._kernel_kmeans_pp_sequential(cluster_distance_space)
 		else:
 			raise ValueError("Wrong sampling method! options = ['batch', 'sequential']")
 	
@@ -231,7 +231,10 @@ class GlobalKernelKMeansPP(_BaseGlobalKernelKMeans):
 		selected_indexes = np.random.choice(self.N, size=self.n_candidates, p=selection_prob, replace=False) 
 		return selected_indexes
 	
-	def _kernel_kmeans_pp_sequential(self, X, cluster_distance_space):
+	def calculate_kernel_distance_between_points(self, i, j):
+		return self.kernel_matrix[i, i] - (2 * self.kernel_matrix[i, j]) + self.kernel_matrix[j, j]
+	
+	def _kernel_kmeans_pp_sequential(self, cluster_distance_space):
 		selected_indexes = np.zeros(shape=(self.n_candidates), dtype=np.int32)       
 		cluster_distance_space = cluster_distance_space.flatten()
 		for i in range(self.n_candidates):
@@ -240,12 +243,20 @@ class GlobalKernelKMeansPP(_BaseGlobalKernelKMeans):
 			selection_prob = cluster_distance_space_squared / sum_distance
 			selected_indexes[i] = np.random.choice(self.N, size=1, p=selection_prob, replace=False)
 			
-			candidate = X[selected_indexes[i]]
-			candidate = np.reshape(candidate, newshape=(1, candidate.shape[0]))
-			candidate_data_distances = pairwise_distances(candidate, X).flatten()
+			# OLD CODE WITH X
+			#candidate = X[selected_indexes[i]]
+			#candidate = np.reshape(candidate, newshape=(1, candidate.shape[0]))
+			#candidate_data_distances = pairwise_distances(candidate, X).flatten()
+			
+			# NEW CODE WITHOUT X
+			# Question Do we want distances Distances in Kernel Space so we will use Kii + Kjj - 2*Kii*Kjj?  
+			candidate_data_distances = np.zeros(self.N)
+			for j in range(self.N):
+				candidate_data_distances[j] = self.calculate_kernel_distance_between_points(selected_indexes[i],j)
 
 			# Update probability distribution
 			for i, _ in enumerate(cluster_distance_space):
 				if candidate_data_distances[i] < cluster_distance_space[i]:
 					cluster_distance_space[i] = candidate_data_distances[i]
+		
 		return selected_indexes
