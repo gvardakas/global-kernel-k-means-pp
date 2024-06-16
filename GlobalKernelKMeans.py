@@ -120,7 +120,7 @@ class GlobalKernelKMeans(_BaseGlobalKernelKMeans):
 						
 			self.inertia_[k] = float('inf')
 			for i in range(self.N):
-				if(np.where(initial_labels_ == initial_labels_[i])[0].shape[0] <= 1):
+				if(np.where(initial_labels_ == initial_labels_[i])[0].shape[0] <= 1): # Check for clusters with 1 point
 					continue
 
 				prev_xi_label = initial_labels_[i]
