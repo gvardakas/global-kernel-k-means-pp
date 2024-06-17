@@ -231,10 +231,8 @@ class GlobalKernelKMeansPP(_BaseGlobalKernelKMeans):
 		selected_indexes = np.random.choice(self.N, size=self.n_candidates, p=selection_prob, replace=False) 
 		return selected_indexes
 	
-	def calculate_kernel_distance_between_points(self, i, j):
-		return self.kernel_matrix[i, i] - (2 * self.kernel_matrix[i, j]) + self.kernel_matrix[j, j]
-	
 	def _kernel_kmeans_pp_sequential(self, cluster_distance_space):
+		candidate_data_distances = np.zeros(self.N)
 		selected_indexes = np.zeros(shape=(self.n_candidates), dtype=np.int32)       
 		cluster_distance_space = cluster_distance_space.flatten()
 		for i in range(self.n_candidates):
@@ -243,16 +241,9 @@ class GlobalKernelKMeansPP(_BaseGlobalKernelKMeans):
 			selection_prob = cluster_distance_space_squared / sum_distance
 			selected_indexes[i] = np.random.choice(self.N, size=1, p=selection_prob, replace=False)
 			
-			# OLD CODE WITH X
-			#candidate = X[selected_indexes[i]]
-			#candidate = np.reshape(candidate, newshape=(1, candidate.shape[0]))
-			#candidate_data_distances = pairwise_distances(candidate, X).flatten()
-			
-			# NEW CODE WITHOUT X
-			# Question Do we want distances Distances in Kernel Space so we will use Kii + Kjj - 2*Kii*Kjj?  
-			candidate_data_distances = np.zeros(self.N)
+			candidate_index = selected_indexes[i]
 			for j in range(self.N):
-				candidate_data_distances[j] = self.calculate_kernel_distance_between_points(selected_indexes[i],j)
+				candidate_data_distances[j] = self.kernel_matrix[candidate_index, candidate_index] - (2 * self.kernel_matrix[candidate_index, j]) + self.kernel_matrix[j, j]
 
 			# Update probability distribution
 			for i, _ in enumerate(cluster_distance_space):
