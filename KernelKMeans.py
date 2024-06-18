@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 import math
+import time
 from Initialization import Initialization
 
 class _BaseKernelKMeans(BaseEstimator, ClusterMixin, TransformerMixin, ABC):
@@ -38,6 +39,7 @@ class _BaseKernelKMeans(BaseEstimator, ClusterMixin, TransformerMixin, ABC):
         self.n_iter_ = 0
         self.labels_ = []
         self.inertia_ = math.inf
+        self.execution_times_ = {}
 
     @abstractmethod	
     def fit(self, X=None, y=None, sample_weight=None):
@@ -140,12 +142,12 @@ class KernelKMeans(_BaseKernelKMeans):
             current_labels_ = np.argmin(distances, axis=0)
             
             if (abs(current_inertia_ - previous_inertia_) < self.tol):   
-                if(self.verbose > 0):
+                if(self.verbose > 1):
                     print(f'Finished in Iter: {self.n_iter_} MSE: {current_inertia_:.4f}')
 
                 return current_labels_, current_inertia_
 
-            if(self.verbose > 1):
+            if(self.verbose > 2):
                 print(f'Iter: {self.n_iter_} MSE: {current_inertia_:.4f}')
             
             previous_inertia_ = current_inertia_
@@ -158,9 +160,11 @@ class KernelKMeans(_BaseKernelKMeans):
         self.labels_ = []
         
         for i in range(self.n_init):
-            if(self.verbose > 0):
-                print(f'Execution {i} of Kernel k-Means with {self.init} initialization')
-
+            if(self.verbose > 1):
+                print(f'Execution {i} of Kernel k-Means')
+            
+            start_time = time.time()	
+            
             if(self.initial_labels_ is None):
                 self.initial_labels_ = self.initialization.calculate_initial_partition(self.n_clusters, self.N, self.kernel_matrix, self.init)
             
@@ -171,5 +175,13 @@ class KernelKMeans(_BaseKernelKMeans):
             if(current_inertia_ < self.inertia_):
                 self.inertia_ = current_inertia_
                 self.labels_ = np.copy(current_labels_)
+            
+            self.execution_times_[i] = time.time() - start_time
+            
+            if(self.verbose > 1):
+                print(f'Execution {i} of Kernel k-Means MSE: {current_inertia_} in {self.execution_times_[i]}s')        
+        
+        if self.verbose > 0: 
+            print(f'Total execution time was {sum(self.execution_times_.values())}s')
         
         return self        
