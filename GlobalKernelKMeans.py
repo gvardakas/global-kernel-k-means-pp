@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.metrics import pairwise_distances
+import time
 from KernelKMeans import KernelKMeans
 
 class _BaseGlobalKernelKMeans(BaseEstimator, ClusterMixin, TransformerMixin, ABC):
@@ -29,6 +30,7 @@ class _BaseGlobalKernelKMeans(BaseEstimator, ClusterMixin, TransformerMixin, ABC
 		self.n_iter_ = 0
 		self.labels_ = {}
 		self.inertia_ = {}
+		self.execution_times_ = {}
 
 	@abstractmethod	
 	def fit(self, X=None, y=None, sample_weight=None):
@@ -117,7 +119,9 @@ class GlobalKernelKMeans(_BaseGlobalKernelKMeans):
 		for k in range(2, self.n_clusters+1):
 			if self.verbose > 0: 
 				print(f'Solving Kernel {k}-means')
-						
+
+			start_time = time.time()			
+			
 			self.inertia_[k] = float('inf')
 			for i in range(self.N):
 				if(np.where(initial_labels_ == initial_labels_[i])[0].shape[0] <= 1): # Check for clusters with 1 point
@@ -136,9 +140,13 @@ class GlobalKernelKMeans(_BaseGlobalKernelKMeans):
 					self.inertia_[k] = kernelKMeans.inertia_
 		
 			initial_labels_ = self.labels_[k]
-
+			self.execution_times_[k] = time.time() - start_time
+			
 			if self.verbose > 0: 
-				print(f'Solved {k}-means MSE: {self.inertia_[k]}')
+				print(f'Solved {k}-means MSE: {self.inertia_[k]} in {self.execution_times_[k]}s')
+		
+		if self.verbose > 0: 
+				print(f'Total execution time was {sum(self.execution_times_.values())}s')
 		
 		return self
 
@@ -193,7 +201,9 @@ class GlobalKernelKMeansPP(_BaseGlobalKernelKMeans):
 		for k in range(2, self.n_clusters+1):
 			if self.verbose > 0: 
 				print(f'Solving {k}-means')
-				
+
+			start_time = time.time()
+	
 			centroid_candidates = self._sampling(self.cluster_distance_space_[k-1])
 			self.inertia_[k] = float('inf')
 			for i in centroid_candidates:
@@ -210,9 +220,13 @@ class GlobalKernelKMeansPP(_BaseGlobalKernelKMeans):
 					self.cluster_distance_space_[k] = kernelKMeans.min_distances
 
 			initial_labels_ = self.labels_[k]
-			
+			self.execution_times_[k] = time.time() - start_time
+
 			if self.verbose > 0: 
-				print(f'Solved {k}-means MSE: {self.inertia_[k]}')
+				print(f'Solved {k}-means MSE: {self.inertia_[k]} in {self.execution_times_[k]}s')
+		
+		if self.verbose > 0: 
+				print(f'Total execution time was {sum(self.execution_times_.values())}s')
 		
 		return self
 	
