@@ -4,6 +4,7 @@ from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.metrics import pairwise_distances
 import time
 from KernelKMeans import KernelKMeans
+from Common_Modules.General_Functions import General_Functions
 
 class _BaseGlobalKernelKMeans(BaseEstimator, ClusterMixin, TransformerMixin, ABC):
 	"""Base class for Global Kernel K-Means, Global Kernel K-Means++ and future (or past) variants.
@@ -21,16 +22,18 @@ class _BaseGlobalKernelKMeans(BaseEstimator, ClusterMixin, TransformerMixin, ABC
 			labels_ (dict) : Dictionary to store cluster labels for each sub-problem k.
 			inertia_ (dict) : Dictionary to store inertia values for each sub-problem k.
 	"""
-	def __init__(self, n_clusters, kernel_matrix, verbose):
+	def __init__(self, n_clusters, kernel_matrix, data_dir_path, verbose):
 		self.n_clusters = n_clusters
 		self.kernel_matrix = kernel_matrix
 		self.verbose = verbose
+		self.data_dir_path = data_dir_path
 		self.N = kernel_matrix.shape[0]
 		
 		self.n_iter_ = 0
 		self.labels_ = {}
 		self.inertia_ = {}
 		self.execution_times_ = {}
+		self.n_iters_ = {}
 
 	@abstractmethod	
 	def fit(self, X=None, y=None, sample_weight=None):
@@ -93,11 +96,12 @@ class GlobalKernelKMeans(_BaseGlobalKernelKMeans):
 			inertia_ (dict) : Dictionary to store inertia values for each sub-problem k.
 
 	"""
-	def __init__(self, n_clusters=8, kernel_matrix=None, verbose=0):
+	def __init__(self, n_clusters=8, kernel_matrix=None, data_dir_path=None, verbose=0):
 		super().__init__(
 			n_clusters=n_clusters,
 			kernel_matrix=kernel_matrix,
-			verbose=verbose,
+			data_dir_path=data_dir_path,
+			verbose=verbose
 		)
 
 	
@@ -121,7 +125,7 @@ class GlobalKernelKMeans(_BaseGlobalKernelKMeans):
 				print(f'Solving Kernel {k}-means')
 
 			start_time = time.time()			
-			
+			self.n_iter_ = 0
 			self.inertia_[k] = float('inf')
 			for i in range(self.N):
 				if(np.where(initial_labels_ == initial_labels_[i])[0].shape[0] <= 1): # Check for clusters with 1 point
@@ -141,7 +145,11 @@ class GlobalKernelKMeans(_BaseGlobalKernelKMeans):
 		
 			initial_labels_ = self.labels_[k]
 			self.execution_times_[k] = time.time() - start_time
+			self.n_iters_[k] = self.n_iter_
 			
+			new_row = { "K": k, "MSE": self.inertia_[k], "ITERATIONS": self.n_iters_[k], "EXECUTION TIME": self.execution_times_[k]}
+			General_Functions.append_to_csv(self.data_dir_path, new_row)
+
 			if self.verbose > 0: 
 				print(f'Solved {k}-means MSE: {self.inertia_[k]} in {self.execution_times_[k]}s')
 		
@@ -168,11 +176,12 @@ class GlobalKernelKMeansPP(_BaseGlobalKernelKMeans):
 			inertia_ (dict) : Dictionary to store inertia values for each sub-problem k.
 			cluster_distance_space_(dict) : Dictionary to store the distance of each data point to the nearest centroid.
 	"""
-	def __init__(self, n_clusters=8, kernel_matrix=None, n_candidates=25, sampling='batch', verbose=0):
+	def __init__(self, n_clusters=8, kernel_matrix=None, n_candidates=25, sampling='batch', data_dir_path=None, verbose=0):
 		super().__init__(
 			n_clusters=n_clusters,
 			kernel_matrix=kernel_matrix,
 			verbose=verbose,
+			data_dir_path=data_dir_path
 		)
 		self.n_candidates = n_candidates
 		self.sampling = sampling
@@ -203,7 +212,7 @@ class GlobalKernelKMeansPP(_BaseGlobalKernelKMeans):
 				print(f'Solving {k}-means')
 
 			start_time = time.time()
-	
+			self.n_iter_ = 0
 			centroid_candidates = self._sampling(self.cluster_distance_space_[k-1])
 			self.inertia_[k] = float('inf')
 			for i in centroid_candidates:
@@ -221,7 +230,10 @@ class GlobalKernelKMeansPP(_BaseGlobalKernelKMeans):
 
 			initial_labels_ = self.labels_[k]
 			self.execution_times_[k] = time.time() - start_time
-
+			self.n_iters_[k] = self.n_iter_
+			new_row = { "K": k, "MSE": self.inertia_[k], "ITERATIONS": self.n_iters_[k], "EXECUTION TIME": self.execution_times_[k]}
+			General_Functions.append_to_csv(self.data_dir_path, new_row)
+			 
 			if self.verbose > 0: 
 				print(f'Solved {k}-means MSE: {self.inertia_[k]} in {self.execution_times_[k]}s')
 		

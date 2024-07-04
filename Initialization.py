@@ -75,8 +75,24 @@ class Initialization:
 
 		return partition
 
+	#def forgy_initialization(self, K, N):
+		#return self.rs.randint(K, size=N)
+
+
 	def forgy_initialization(self, K, N):
-		return self.rs.randint(K, size=N)
+		required_numbers = np.arange(0, K)
+		
+		if N < len(required_numbers):
+			raise ValueError("Total count must be at least as large as the number of unique values in the range")
+
+		additional_count = N - len(required_numbers)
+		additional_numbers = np.random.randint(0, K, additional_count)
+		
+		result_array = np.concatenate((required_numbers, additional_numbers))
+		
+		np.random.shuffle(result_array)
+    
+		return result_array
 
 	def select_random_integers_without_replacement(self, K, N):
 		return random.sample(range(N), K)

@@ -4,6 +4,7 @@ from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 import math
 import time
 from Initialization import Initialization
+from numba import jit
 
 class _BaseKernelKMeans(BaseEstimator, ClusterMixin, TransformerMixin, ABC):
     """Base class for Kernel K-Means, Kernel K-Means++ and future (or past) variants.
@@ -40,6 +41,7 @@ class _BaseKernelKMeans(BaseEstimator, ClusterMixin, TransformerMixin, ABC):
         self.labels_ = []
         self.inertia_ = math.inf
         self.execution_times_ = {}
+        self.n_iters_ = {}
 
     @abstractmethod	
     def fit(self, X=None, y=None, sample_weight=None):
@@ -118,7 +120,7 @@ class KernelKMeans(_BaseKernelKMeans):
         min_distances = np.min(distances, axis=0)
         
         return np.sum(min_distances)
-
+    
     def __kernel_kmeans_functionallity(self, initial_labels_, kernel_matrix):
         self.n_iter_ = 0
         kernel_diag = np.diag(kernel_matrix)
@@ -132,6 +134,10 @@ class KernelKMeans(_BaseKernelKMeans):
                 cluster_indices = np.where(previous_labels_ == clusters_identities[i])[0]
 
                 n_cluster_samples = len(cluster_indices)
+                
+                if(n_cluster_samples == 0):
+                    return None, None
+                    
                 stable_sum = np.sum(kernel_matrix[np.ix_(cluster_indices, cluster_indices)]) / (n_cluster_samples ** 2)
                 sample_sums = np.sum(kernel_matrix[:, cluster_indices], axis=1) / n_cluster_samples
                 
@@ -142,8 +148,8 @@ class KernelKMeans(_BaseKernelKMeans):
             current_labels_ = np.argmin(distances, axis=0)
             
             if (abs(current_inertia_ - previous_inertia_) < self.tol):   
-                if(self.verbose > 1):
-                    print(f'Finished in Iter: {self.n_iter_} MSE: {current_inertia_:.4f}')
+                #if(self.verbose > 1):
+                    #print(f'Finished in Iter: {self.n_iter_} MSE: {current_inertia_:.4f}')
 
                 return current_labels_, current_inertia_
 
@@ -158,8 +164,8 @@ class KernelKMeans(_BaseKernelKMeans):
     def fit(self):
         self.inertia_ = math.inf
         self.labels_ = []
-        
-        for i in range(self.n_init):
+        i = 0
+        while (i < self.n_init):
             if(self.verbose > 1):
                 print(f'Execution {i} of Kernel k-Means')
             
@@ -169,19 +175,23 @@ class KernelKMeans(_BaseKernelKMeans):
                 self.initial_labels_ = self.initialization.calculate_initial_partition(self.n_clusters, self.N, self.kernel_matrix, self.init)
             
             current_labels_, current_inertia_ = self.__kernel_kmeans_functionallity(initial_labels_ = np.copy(self.initial_labels_), kernel_matrix=self.kernel_matrix)
-            
+             
             self.initial_labels_ = None
+            
+            if(current_inertia_ == None and current_labels_ == None):
+                continue 
 
             if(current_inertia_ < self.inertia_):
                 self.inertia_ = current_inertia_
                 self.labels_ = np.copy(current_labels_)
             
             self.execution_times_[i] = time.time() - start_time
-            
+            self.n_iters_[i] = self.n_iter_
+
             if(self.verbose > 1):
                 print(f'Execution {i} of Kernel k-Means MSE: {current_inertia_} in {self.execution_times_[i]}s')        
-        
+            i+=1
         if self.verbose > 0: 
             print(f'Total execution time was {sum(self.execution_times_.values())}s')
-        
+
         return self        
