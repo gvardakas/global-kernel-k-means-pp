@@ -4,7 +4,6 @@ from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 import math
 import time
 from Initialization import Initialization
-from numba import jit
 
 class _BaseKernelKMeans(BaseEstimator, ClusterMixin, TransformerMixin, ABC):
     """Base class for Kernel K-Means, Kernel K-Means++ and future (or past) variants.
