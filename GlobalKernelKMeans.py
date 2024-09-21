@@ -245,7 +245,7 @@ class GlobalKernelKMeansPP(_BaseGlobalKernelKMeans):
 	def _sampling(self, cluster_distance_space):
 		if self.sampling == 'batch':
 			return self._kernel_kmeans_pp_batch(cluster_distance_space)
-		elif self.sampling == 'sequential': # TODO FIX IT
+		elif self.sampling == 'sequential':
 			return self._kernel_kmeans_pp_sequential(cluster_distance_space)
 		else:
 			raise ValueError("Wrong sampling method! options = ['batch', 'sequential']")
