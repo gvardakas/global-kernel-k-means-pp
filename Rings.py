@@ -1,3 +1,5 @@
+
+import scipy.io
 import numpy as np
 from sklearn.datasets import make_circles
 import matplotlib.pyplot as plt
@@ -14,20 +16,18 @@ class Rings:
 		label_offset = 0
         
 		for center_coordinates in centers_coordinates:
-            # Generate ring
 			X_ring = self.generate_circle(n_samples, radius, noise)
-			y_ring = np.full(X_ring.shape[0], label_offset)  # Label for the ring
+			y_ring = np.full(X_ring.shape[0], label_offset)
 			X_ring = self.move_rings(center_coordinates, X_ring)
 			X_list.append(X_ring)
 			y_list.append(y_ring)
             
-            # Generate 2 Gaussians inside the ring
 			gaussians_X, gaussians_y = self.generate_gaussians(
                 gaussian_samples,
                 means=[(center_coordinates[0] - 1, center_coordinates[1]), 
-                       (center_coordinates[0] + 1, center_coordinates[1])],  # Centered near the ring's center
-                cov=[[0.1, 0], [0, 0.1]],  # Covariance matrix
-                labels=[label_offset + 1, label_offset + 2]  # Unique labels for Gaussians
+                       (center_coordinates[0] + 1, center_coordinates[1])],
+                cov=[[0.1, 0], [0, 0.1]],
+                labels=[label_offset + 1, label_offset + 2]
             )
 
 			X_list.append(gaussians_X)
@@ -35,11 +35,9 @@ class Rings:
 
 			label_offset = label_offset + 3
         
-		# Concatenate all parts
 		X = np.concatenate(X_list)
 		y = np.concatenate(y_list)
 
-		self.plot(X, y)
 		return X, y
 	
 	def plot(self, X, labels_):
@@ -66,8 +64,6 @@ class Rings:
 		X = np.concatenate([X for X, _ in pairs])
 		y = np.concatenate([y for _, y in pairs])
 
-		self.plot(X, y)
-
 		return X, y
 
 	def generate_circle(self, n_samples, radius, noise):
@@ -89,11 +85,10 @@ class Rings:
 			
 			for i, radius in enumerate(radii):
 				X = self.generate_circle(n_samples // len(radii), radius, noise)
-				y = np.full(X.shape[0], i)  # Assign unique label for each ring
+				y = np.full(X.shape[0], i)
 				X_list.append(X)
 				y_list.append(y)
             
-			# Concatenate all rings
 			X = np.concatenate(X_list)
 			y = np.concatenate(y_list)
 			X = self.move_rings(center_coordinates, X)
@@ -117,4 +112,11 @@ class Rings:
 			label += 2
 
 		return self.concatenate_pairs(pairs)	
+	
+	def global_kernel_k_means_three_rings(self):
+		X = np.array(scipy.io.loadmat('3circles_dataset.mat')['Dataset'])
+		y = np.loadtxt('array.txt').astype(int)
+		kernel_matrix = np.array(scipy.io.loadmat('3circles_kernel_matrix.mat')['K'])
+
+		return X, y, kernel_matrix
 		
