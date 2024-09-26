@@ -22,8 +22,6 @@ class Graph:
 			self.kernel_matrix = self.modification.modify_kernel_matrix(self.adj_matrix, b)
 		else:
 			self.kernel_matrix = self.adj_matrix
-		
-		return self.kernel_matrix	
 	
 	def plot_affinity_matrix(self):
 		plt.figure(figsize=(8, 6))
