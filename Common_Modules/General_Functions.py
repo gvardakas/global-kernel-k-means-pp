@@ -10,6 +10,15 @@ class General_Functions:
     def __init__(self):
         self.evaluator = Evaluator()
 
+    def calculate_gamma_scale(X):
+        # X is expected to be a 2D array where rows are samples and columns are features
+        n_features = X.shape[1]  # Number of features
+        variance = np.var(X)      # Variance of the entire dataset
+        gamma = 1 / (n_features * variance)
+    
+        return gamma
+
+
     def create_and_load_workbook(self, workbook_path):
         if os.path.exists(workbook_path)!=True:
             workbook = Workbook()

@@ -6,10 +6,28 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 
 class Rings:            
-	def __init__(self, colors, seed=42):
-		self.colors = colors
+	def __init__(self, seed=42):
 		self.seed = seed
 		np.random.seed(self.seed)
+	
+	def make_spiral(self, n_samples=1000, noise=0.05, n_turns=2, separation=2):
+		"""Generate a 2D dataset with two interlocking spirals."""
+		theta = np.sqrt(np.random.rand(n_samples)) * n_turns * 2 * np.pi  # Random angles
+		r = theta + noise * np.random.randn(n_samples)  # Radii with noise
+
+		# First spiral (positive labels)
+		X1 = np.c_[r * np.cos(theta), r * np.sin(theta)]
+		y1 = np.zeros(n_samples)
+
+		# Second spiral (negative labels) - rotate by 180 degrees
+		X2 = np.c_[r * np.cos(theta + np.pi), r * np.sin(theta + np.pi)]
+		y2 = np.ones(n_samples)
+
+		# Concatenate spirals and labels
+		X = np.vstack((X1, X2))
+		y = np.hstack((y1, y2))
+
+		return X, y
 
 	def make_multiple_rings_with_gaussians(self, centers_coordinates, n_samples=100, radius=10, noise=0.05, gaussian_samples=50):
 		X_list, y_list = [], []
@@ -40,16 +58,19 @@ class Rings:
 
 		return X, y
 	
-	def plot(self, X, labels_):
-		plt.scatter(X[:, 0], X[:, 1], c=labels_, cmap=ListedColormap(self.colors))
-		plt.show()
-
-	def remove_samples_with_specific_label(self, X, y, label):
+	def remove_samples_with_specific_label(self, X, y, label, num_to_remove):
 		indices_to_remove = np.where(np.array(y) == label)[0]
+
+		# Determine how many indices to actually remove
+		num_available = len(indices_to_remove)
+		num_removed = min(num_to_remove, num_available)  # Remove only available samples
+
+		# Select indices to remove
+		indices_to_remove = indices_to_remove[:num_removed]  # Limit to num_removed
 		X = np.delete(X, indices_to_remove, axis=0)
 		y = np.delete(y, indices_to_remove)
 
-		return X,y
+		return X, y
 	
 	def move_rings(self, center_coordinates, X):
 		X[:, 0] += center_coordinates[0]  
@@ -107,6 +128,8 @@ class Rings:
 			
 			X = self.move_rings(center_coordinates, X)
 			y = self.adjust_labels(y, label)
+			
+			#X, y = self.remove_samples_with_specific_label(X, y, label-1, round(n_samples/4))
 			
 			pairs.append((X, y))
 			label += 2

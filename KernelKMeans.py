@@ -164,6 +164,7 @@ class KernelKMeans(_BaseKernelKMeans):
         self.inertia_ = math.inf
         self.labels_ = []
         i = 0
+        total_inertia_ = 0
         while (i < self.n_init):
             if(self.verbose > 1):
                 print(f'Execution {i} of Kernel k-Means')
@@ -183,7 +184,7 @@ class KernelKMeans(_BaseKernelKMeans):
             if(current_inertia_ < self.inertia_):
                 self.inertia_ = current_inertia_
                 self.labels_ = np.copy(current_labels_)
-            
+            total_inertia_ += current_inertia_
             self.execution_times_[i] = time.time() - start_time
             self.n_iters_[i] = self.n_iter_
 
@@ -192,5 +193,5 @@ class KernelKMeans(_BaseKernelKMeans):
             i+=1
         if self.verbose > 0: 
             print(f'Total execution time was {sum(self.execution_times_.values())}s')
-
+        #print(f"Avg Inertia was {total_inertia_/self.n_init}")
         return self        
