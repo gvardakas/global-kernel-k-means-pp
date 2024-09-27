@@ -10,9 +10,27 @@ class Visualization:
         self.color_list = self.init_color_list()
 
     def init_color_list(self):
-        color_list = list(mcolors.CSS4_COLORS.keys()) + list(mcolors.XKCD_COLORS.keys())
-        np.random.shuffle(color_list)
-        color_list = ['deepskyblue', 'orange', 'hotpink', 'limegreen'] + color_list
+        color_list = [
+            '#FF0000',  # Bright Red
+            '#0000FF',  # Bright Blue
+            '#00FF00',  # Bright Green
+            '#FFFF00',  # Bright Yellow
+            '#FF00FF',  # Bright Magenta
+            '#00FFFF',  # Bright Cyan
+            '#FFA500',  # Bright Orange
+            '#800080',  # Intense Purple
+            '#FF1493',  # Neon Pink
+            '#00FF7F',  # Bright Spring Green
+            '#1E90FF',  # Dodger Blue
+            '#FFD700',  # Gold
+            '#FF4500',  # Orange Red
+            '#8B00FF',  # Violet (Electric Purple)
+            '#00CED1',  # Dark Turquoise
+            '#FF6347',  # Tomato (Bright Red-Orange)
+            '#7FFF00',  # Chartreuse (Bright Yellow-Green)
+            '#DC143C',  # Crimson (Deep Red)
+        ]
+
         return color_list
     
     def plot_image(self, image, label):
