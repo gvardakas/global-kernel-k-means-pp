@@ -120,7 +120,7 @@ class KernelKMeans(_BaseKernelKMeans):
         
         return np.sum(min_distances)
     
-    def __kernel_kmeans_functionallity(self, initial_labels_, kernel_matrix):
+    def __kernel_kmeans(self, initial_labels_, kernel_matrix):
         self.n_iter_ = 0
         kernel_diag = np.diag(kernel_matrix)
         distances = np.zeros((self.n_clusters, self.N))
@@ -152,7 +152,7 @@ class KernelKMeans(_BaseKernelKMeans):
 
                 return current_labels_, current_inertia_
 
-            if(self.verbose > 2):
+            if (self.verbose > 2):
                 print(f'Iter: {self.n_iter_} MSE: {current_inertia_:.4f}')
             
             previous_inertia_ = current_inertia_
@@ -160,7 +160,55 @@ class KernelKMeans(_BaseKernelKMeans):
 
             self.n_iter_ += 1
 
-    def fit(self):
+    def __weigthed_kernel_kmeans(self, initial_labels_, kernel_matrix, sample_weights):
+        self.n_iter_ = 0
+        kernel_diag = np.diag(kernel_matrix)
+        distances = np.zeros((self.n_clusters, self.N))
+
+        previous_inertia_ = math.inf
+        clusters_identities, previous_labels_ = self.initialization.scale_partition(self.n_clusters, np.copy(initial_labels_))
+
+        while True:
+            for i in range(self.n_clusters):
+                cluster_indices = np.where(previous_labels_ == clusters_identities[i])[0]
+
+                n_cluster_samples = np.sum(sample_weights[cluster_indices])
+
+                if(n_cluster_samples == 0):
+                    return None, None
+
+                # Stable sum with element-wise multiplication of kernel_matrix for both rows and columns by weights
+                stable_sum = np.sum(
+                    kernel_matrix[np.ix_(cluster_indices, cluster_indices)] * 
+                    np.outer(sample_weights[cluster_indices], sample_weights[cluster_indices])
+                ) / (n_cluster_samples ** 2)
+
+                # Sample sums with element-wise multiplication for all relevant indices
+                sample_sums = np.sum(
+                    kernel_matrix[:, cluster_indices] * sample_weights[cluster_indices], 
+                    axis=1
+                ) / n_cluster_samples
+
+                # Update distances with new calculations
+                distances[i] = kernel_diag - 2 * sample_sums + stable_sum
+
+            self.min_distances = np.min(distances, axis=0)
+            current_inertia_ = np.sum(sample_weights * self.min_distances)
+            current_labels_ = np.argmin(distances, axis=0)
+
+            if (abs(current_inertia_ - previous_inertia_) < self.tol):
+                return current_labels_, current_inertia_
+
+            if (self.verbose > 2):
+                print(f'Iter: {self.n_iter_} MSE: {current_inertia_:.4f}')
+
+            previous_inertia_ = current_inertia_
+            previous_labels_ = np.copy(current_labels_)
+
+            self.n_iter_ += 1
+
+
+    def fit(self, sample_weights=None):
         self.inertia_ = math.inf
         self.labels_ = []
         i = 0
@@ -174,7 +222,10 @@ class KernelKMeans(_BaseKernelKMeans):
             if(self.initial_labels_ is None):
                 self.initial_labels_ = self.initialization.calculate_initial_partition(self.n_clusters, self.N, self.kernel_matrix, self.init)
             
-            current_labels_, current_inertia_ = self.__kernel_kmeans_functionallity(initial_labels_ = np.copy(self.initial_labels_), kernel_matrix=self.kernel_matrix)
+            if(sample_weights is None):
+                current_labels_, current_inertia_ = self.__kernel_kmeans(initial_labels_ = np.copy(self.initial_labels_), kernel_matrix=self.kernel_matrix)
+            else:    
+                current_labels_, current_inertia_ = self.__weigthed_kernel_kmeans(initial_labels_ = np.copy(self.initial_labels_), kernel_matrix=self.kernel_matrix, sample_weights=sample_weights)
              
             self.initial_labels_ = None
             
