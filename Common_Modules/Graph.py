@@ -17,11 +17,11 @@ class Graph:
 	def create_adj_matrix(self):
 		self.adj_matrix = nx.to_numpy_array(self.G)
 
-	def create_kernel_matrix_from_adj_matrix(self, b=0.0001):
-		if(not self.modification.check_for_positive_definite_matrix(self.adj_matrix)):
-			self.kernel_matrix = self.modification.modify_kernel_matrix(self.adj_matrix, b)
+	def create_kernel_matrix_from_adj_matrix(self, b=0.1, D=None):
+		if(D is None):
+			return self.modification.modify_kernel_matrix_ra(self.adj_matrix, b)
 		else:
-			self.kernel_matrix = self.adj_matrix
+			return self.modification.modify_kernel_matrix_nc(self.adj_matrix, D, b)
 	
 	def plot_affinity_matrix(self):
 		plt.figure(figsize=(8, 6))
@@ -46,7 +46,7 @@ class Graph:
 		# Plot the graph
 		plt.figure(figsize=(8, 6))
 		pos = nx.spring_layout(self.G)
-		nx.draw(self.G, pos, with_labels=False, node_color=node_colors, node_size=500, font_size=12, font_weight='bold')
+		nx.draw(self.G, pos, with_labels=False, node_color=node_colors, node_size=5, font_size=12, font_weight='bold')
 		plt.title("Graph Colored by Labels")
 		plt.show()
 	
@@ -61,4 +61,23 @@ class Graph:
     		p=p_matrix  # Probability matrix for inter-community edges
 		)
 
-		self.plot()
+		#self.plot()
+
+
+	def create_G_from_file(self, file_path):
+		edges = []
+		with open(file_path, 'r') as f:
+			for line in f:
+				node1, node2 = map(int, line.split())  # Convert the pair of nodes to integers
+				#if node1 != node2:  # Skip self-loop edges (e.g., 0 0, 1 1)
+				edges.append((node1, node2))  # Add edge tuple to the list
+		self.G = nx.Graph()
+		self.G.add_edges_from(edges)
+
+	def create_sample_weights_and_degree_matrix(self):
+
+		# Sum the rows of the adjacency matrix to get the degrees of each node
+		self.sample_weights = np.sum(self.adj_matrix, axis=1)
+
+		# Create a diagonal matrix with the degrees
+		self.degree_matrix = np.diag(self.sample_weights)	
