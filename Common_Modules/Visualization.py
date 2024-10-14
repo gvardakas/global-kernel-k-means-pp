@@ -11,24 +11,24 @@ class Visualization:
 
     def init_color_list(self):
         color_list = [
-            '#FF0000',  # Bright Red
-            '#0000FF',  # Bright Blue
-            '#00FF00',  # Bright Green
-            '#FFFF00',  # Bright Yellow
-            '#FF00FF',  # Bright Magenta
-            '#00FFFF',  # Bright Cyan
-            '#FFA500',  # Bright Orange
-            '#800080',  # Intense Purple
-            '#FF1493',  # Neon Pink
-            '#00FF7F',  # Bright Spring Green
-            '#1E90FF',  # Dodger Blue
-            '#FFD700',  # Gold
-            '#FF4500',  # Orange Red
-            '#8B00FF',  # Violet (Electric Purple)
-            '#00CED1',  # Dark Turquoise
-            '#FF6347',  # Tomato (Bright Red-Orange)
-            '#7FFF00',  # Chartreuse (Bright Yellow-Green)
-            '#DC143C',  # Crimson (Deep Red)
+            "#a13830",
+            "#008897",
+            "#FF4500",  # Orange Red
+            "#6b6a72",
+            "#FFB347",  # Papaya Orange
+            "#0000FF",  # Pure Blue
+            "#7c503a",
+            "#228B22",  # Forest Green
+            "#9B870C",  # Dark Yellow
+            "#9400D3",  # Dark Violet
+            "#101010",  # Rich Black
+            "#00FF00",  # Lime Green
+            "#FF1493",  # Deep Pink
+            "#00FFFF",  # Cyan,
+            "#7c4e75",
+            "#00FA9A",  # Medium Spring Green
+            "#e0cd4d",
+            "#40E0D0",  # Turquoise,
         ]
 
         return color_list
@@ -120,7 +120,7 @@ class Visualization:
         
         plt.axis('off')
         
-        plt.savefig(data_dir_path + "_NO_TSNE.png")
+        plt.savefig(data_dir_path + ".png")
         plt.show()   
 
     def plot_3D(self, data, y_true, y_predict, cluster_centers, data_dir_path):
