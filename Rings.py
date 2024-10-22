@@ -17,11 +17,11 @@ class Rings:
 
 		# First spiral (positive labels)
 		X1 = np.c_[r * np.cos(theta), r * np.sin(theta)]
-		y1 = np.zeros(n_samples)
+		y1 = np.zeros(n_samples, dtype=int)
 
 		# Second spiral (negative labels) - rotate by 180 degrees
 		X2 = np.c_[r * np.cos(theta + np.pi), r * np.sin(theta + np.pi)]
-		y2 = np.ones(n_samples)
+		y2 = np.ones(n_samples, dtype=int)
 
 		# Concatenate spirals and labels
 		X = np.vstack((X1, X2))
