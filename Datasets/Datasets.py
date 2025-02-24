@@ -345,6 +345,14 @@ def get_breast_cancer_np():
     
     return process_data_labels(breast_cancer.data, breast_cancer.target)
 
+def get_avila_np():
+    df_train = pd.read_csv(folder_path + "/avila/avila-tr.txt", header=None)
+    df_test = pd.read_csv(folder_path + "/avila/avila-ts.txt", header=None)
+
+    df = pd.concat([df_train, df_test], axis=0)
+    
+    return process_data_labels(df.iloc[:, :-1], df.iloc[:, -1])
+
 def get_dataset(dataset_name, batch_size=64):
     function_name = "get_" + dataset_name + "_np"
     function_to_call = globals()[function_name]
