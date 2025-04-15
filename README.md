@@ -1,17 +1,17 @@
 # Efficient error minimization in kernel k-means clustering
 
-Kernel ***k***-means extends the k-means algorithm to identify non-linearly separable clusters but is inherently sensitive to cluster initialization. To address
-this challenge, we first formulate the kernel k-means++ method, which conveys
-the efficient center initialization strategy of k-means++ from Euclidean to kernel space. Building on this, we propose global kernel k-means++ (GKkM++), a
+Kernel ***k***-means extends the ***k***-means algorithm to identify non-linearly separable clusters but is inherently sensitive to cluster initialization. To address
+this challenge, we first formulate the kernel ***k***-means++ method, which conveys
+the efficient center initialization strategy of ***k***-means++ from Euclidean to kernel space. Building on this, we propose global kernel ***k***-means++ (GK***k***M++), a
 novel clustering algorithm designed to balance clustering error minimization with
-reduced computational cost. GKkM++ extends the well-established global kernel
-k-means algorithm by incorporating the stochastic initialization strategy of kernel
-k-means++. This approach significantly reduces computational complexity while
+reduced computational cost. GK***k***M++ extends the well-established global kernel
+***k***-means algorithm by incorporating the stochastic initialization strategy of kernel
+***k***-means++. This approach significantly reduces computational complexity while
 preserving superior clustering error minimization capabilities akin to traditional
-global kernel k-means. The experimental results on synthetic, real, and graph
-datasets indicate that GKkM++ consistently outperforms both kernel k-means
-with random initialization and kernel k-means++, while achieving solutions comparable to those provided by the exhaustive and computational intensive global
-kernel k-means method.
+global kernel ***k***-means. The experimental results on synthetic, real, and graph
+datasets indicate that GK***k***M++ consistently outperforms both kernel ***k***-means
+with random initialization and kernel ***k***-means++, while achieving solutions comparable to those provided by the exhaustive and computational intensive global
+kernel ***k***-means method.
 
 
 # Execution Instructions
