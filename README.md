@@ -1,6 +1,6 @@
 # Efficient error minimization in kernel k-means clustering
 
-Kernel **k**-means extends the k-means algorithm to identify non-linearly separable clusters but is inherently sensitive to cluster initialization. To address
+Kernel ***k***-means extends the k-means algorithm to identify non-linearly separable clusters but is inherently sensitive to cluster initialization. To address
 this challenge, we first formulate the kernel k-means++ method, which conveys
 the efficient center initialization strategy of k-means++ from Euclidean to kernel space. Building on this, we propose global kernel k-means++ (GKkM++), a
 novel clustering algorithm designed to balance clustering error minimization with
