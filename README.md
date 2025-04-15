@@ -1,7 +1,19 @@
-# Efficient error minimization in kernel \i{k}-means clustering
+# Efficient error minimization in kernel k-means clustering
 
-Unsupervised learning has gained prominence in the big data era, offering a means to extract valuable insights from unlabeled datasets. Deep clustering has emerged as an important unsupervised category, aiming to exploit the non-linear mapping capabilities of neural networks in order to enhance clustering performance. The majority of deep clustering literature focuses on minimizing the inner-cluster variability in some embedded space while keeping the learned representation consistent with the original high-dimensional dataset. In this work, we propose \emph{soft silhoutte}, a probabilistic formulation of the silhouette coefficient. Soft silhouette rewards compact and distinctly separated clustering solutions like the conventional silhouette coefficient. When optimized within a deep clustering framework, soft silhouette guides the learned representations towards forming compact and well-separated clusters. In addition, we introduce an autoencoder-based deep learning architecture that is suitable for optimizing the soft silhouette objective function. The proposed deep clustering method has been tested and compared with several well-studied deep clustering methods on various benchmark datasets, yielding very satisfactory clustering results.
+Kernel k-means extends the k-means algorithm to identify non-linearly separable clusters but is inherently sensitive to cluster initialization. To address
+this challenge, we first formulate the kernel k-means++ method, which conveys
+the efficient center initialization strategy of k-means++ from Euclidean to kernel space. Building on this, we propose global kernel k-means++ (GKkM++), a
+novel clustering algorithm designed to balance clustering error minimization with
+reduced computational cost. GKkM++ extends the well-established global kernel
+k-means algorithm by incorporating the stochastic initialization strategy of kernel
+k-means++. This approach significantly reduces computational complexity while
+preserving superior clustering error minimization capabilities akin to traditional
+global kernel k-means. The experimental results on synthetic, real, and graph
+datasets indicate that GKkM++ consistently outperforms both kernel k-means
+with random initialization and kernel k-means++, while achieving solutions comparable to those provided by the exhaustive and computational intensive global
+kernel k-means method.
+
 
 # Execution Instructions
 1) You should first install all requirements via running in your terminal the command pip install -r requirements.txt.
-2) You should open the DCSS_Demo.ipynb and run each cell of it via a suitable program e.g. Visual Code.  
+2) You should open the .ipynb and run each cell of it via a suitable program e.g. Visual Code.  
