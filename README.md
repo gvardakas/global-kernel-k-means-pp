@@ -16,4 +16,4 @@ kernel k-means method.
 
 # Execution Instructions
 1) You should first install all requirements via running in your terminal the command pip install -r requirements.txt.
-2) You should open the .ipynb and run each cell of it via a suitable program e.g. Visual Code.  
+2) You should open the Kernel k-means.ipynb, Kernel k-means_Graphs.ipynb and Kernel k-means_Rings.ipynb, and for each one of them run each cell of it via a suitable program e.g. Visual Code.  
