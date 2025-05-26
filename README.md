@@ -16,4 +16,20 @@ kernel ***k***-means method.
 
 # Execution Instructions
 1) You should first install all requirements via running in your terminal the command pip install -r requirements.txt.
-2) You should open the Kernel k-means.ipynb, Kernel k-means_Graphs.ipynb and Kernel k-means_Rings.ipynb, and for each one of them run each cell of it via a suitable program e.g. Visual Code.  
+2) You should open the Kernel k-means.ipynb, Kernel k-means_Graphs.ipynb and Kernel k-means_Rings.ipynb, and for each one of them run each cell of it via a suitable program e.g. Visual Code.
+
+
+# Reference
+```
+@article{vardakas2025efficient,
+  title={Efficient error minimization in kernel k-means clustering},
+  author={Vardakas, Georgios and Papakostas, Ioannis and Likas, Aristidis},
+  journal={Pattern Analysis and Applications},
+  volume={28},
+  number={2},
+  pages={1--25},
+  year={2025},
+  publisher={Springer}
+}
+```
+
